@@ -19,6 +19,9 @@ procedure to control the *familywise error rate* (FWER) for a family of
 hypotheses. Users may specify either the “pairs” non-parametric
 bootstrap or the Wild parameteric bootstrap.
 
+For additional technical and implementation details, please read the
+[Vignette](https://fdhidalgo.github.io/multitestr/articles/multitestr.html).
+
 ## Installation
 
 You can install the current version of `multitestr` from
