@@ -161,6 +161,8 @@ We compare the FWER across three types of *p*-values: unadjusted (`nominal`) *p*
 
 ## Application
 
+### Multiple Outcomes
+
 To demonstrate `multitestr`'s functionality, we reproduce (up to sampling error) some results from Casey et al (2012).  The study estimates the effect of a ``community-driven development'' program on 12 composite outcomes in Sierra Leone. 
 
 The user must specify a list of `full_formulas` and `null_formulas`, where the `full_formulas` are the full regression models being tested and  `null_formulas` are models under the null hypothesis. In this particular case, the `full_formulas` are formulas with 12 different outcome variables (`z_score_1`...`z_score_12`), the treatment variable (`t`), pre-treatment covariates (`tothhs` and `road`), and strata fixed effects (`ward`).  The `null_formulas` are the corresponding models without a treatment variable, since the null hyptothesis is that the treatment had no effect. 
@@ -183,7 +185,7 @@ dplyr::mutate_if(pvals, is.numeric, round, 3)
 `bs_pvalues_unadjusted` are the bootstrap-based p-values with no adjustment for mutltiple testing. `bs_pvalues_adjusted` have been adjusted for multiple testing using the algorithm described in Westfall and Young (1993).
 
 
-### Subgroup Analysis
+### Multiple Subgroups
 
 A frequent use case for multiple testing adjustment is hypothesis testing across multiple subgroups. To specify different subgroups, use the `weights` parameter to pass different sets of weights corresponding to the subgroups of interest. For example, if we were interested in estimating the effect of treatment in 4 different population-based subgroups on outcome `zscore_6`, we would create a list of 4 different set of weights, where each list element is comprised of a different set of weights. Each set of weights corresponds to a different subgroup of interest, such that units belonging to the subgroup of interest receive a weight of 1, while other units receive a weight of 0. 
 
