@@ -1,0 +1,28 @@
+Package: multitestr
+Type: Package
+Title: Multiple Comparison Adjustments for Hypothesis Testing
+Version: 0.1.1.9000
+Date: 2017-10-17
+Authors@R: as.person(c(
+    "F. Daniel Hidalgo <dhidalgo@mit.edu> [aut, cre]"))
+Description: An implementation of Westfall and Young's (1993) free step-down
+    method to adjust p-values in resampling-based multiple testing.
+License: GPL-2
+LazyData: TRUE
+Imports: 
+  dplyr,
+  foreach,
+  lmtest,
+  sandwich,
+  stats,
+  utils
+Suggests: 
+    knitr,
+    lfe,
+    mvtnorm,
+    parallel,
+    rmarkdown,
+    spelling
+VignetteBuilder: knitr
+RoxygenNote: 6.1.0
+Language: en-US

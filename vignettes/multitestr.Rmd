@@ -1,0 +1,239 @@
+--- 
+title: "Free Step-down Adjusted *p*-values" 
+author: "F. Daniel Hidalgo and Weihuang Wong" 
+date: "`r Sys.Date()`" 
+output: rmarkdown::html_vignette 
+vignette: >
+  %\VignetteIndexEntry{Free Step-down Adjusted *p*-values} 
+  %\VignetteEngine{knitr::rmarkdown} 
+  %\VignetteEncoding{UTF-8} 
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+If multiple hypotheses, $m$, are tested simultaneously, the probability of false positives increases in $m$.  If the test statistics used are independent of one another, the probability of incorrectly rejecting at least one null hypothesis at the $\alpha$ level of significance is $1 - (1 - \alpha)^m$.
+
+In this package, we implement the Westfall and Young procedure to control the *familywise error rate* (FWER) for a family of hypotheses.  In this vignette, we describe the concept of a FWER.  We then introduce the Westfall and Young resampling-based step down procedure for adjusting *p*-values to control the FWER.  We use Monte Carlo simulation to demonstrate how the FWER differs when different methods are used to adjust *p*-values.  Finally, we reproduce results from an empirical study to illustrate how the `boot_stepdown` function can used to generate adjusted *p*-values.
+
+For a thorough discussion of error rates, we refer readers to Bertz, Hothorn, and Westfall (2011, Chapter 2).  The exposition in this vignette draws on that chapter.
+
+## Controlling the familywise error rate
+
+Let $V$ be a random variable representing the number of Type I errors or false positives, i.e. the number of hypotheses from a total of $m$ hypotheses that are rejected but are in fact true.  The familywise error rate (FWER) is defined as
+
+\[
+\textrm{FWER} = \Pr(V > 0),
+\]
+
+the probability of committing at least one Type I error.  We say that FWER is controlled at the level $\alpha$ if we can assure that $\textrm{FWER} \leq \alpha$.
+
+### Strong and weak control
+
+We are interested in a multiple testing procedure that strongly controls the FWER.  Error control is *weak* if the Type I error rate (in our case, the FWER) is only controlled under the global null hypothesis,
+
+\[
+H = \bigcap_{i \in M_0} H_i, \quad M_0 = M.
+\]
+
+$M_0$ refers to the set of true hypotheses, and $M$ the set of all hypotheses (true or false) respectively, so $H$ is the event that all null hypotheses $H_1, H_2, \dots, H_m$ are true.  Error control is *strong* for a given multiple testing procedure if the Type I error rate is controlled under any configuration of true and false null hypotheses. Strong control of the FWER at the $\alpha$ level requires that
+
+\[
+\max_{I \subseteq M} \Pr \bigg( V > 0 \bigg| \bigcap_{i \in I} H_i \bigg) \leq \alpha
+\]
+
+where the maximum is taken over all possible configurations $\emptyset \neq I \subseteq M$ of true null hypotheses.
+
+Westfall and Young (1993) show that under some assumptions, in particular the *subset pivotality* assumption, resampling-based methods can control FWER in the strong sense.  A vector of test statistics $\mathbf{T}$ for the set of hypotheses $M$ has the subset pivotality property if the joint distribution of any subvector of $\mathbf{T}$, corresponding to a subset of true null hypotheses, does not depend on the truth or falsehood of hypotheses corresponding to test statistics not in the vector.  
+
+Suppose we ran an experiment and measured 6 different outcomes for each subject, $\mathbf{Y}_i^\top = (Y_{i1}, Y_{i2}, \dots Y_{i6})$, $i = 1, \dots, n$. Let the effect of treatment on outcome $j$ be $\beta_j$, so that our hypotheses of interest are $H_j: \beta_j = 0$ for $j = 1, \dots, 6$ and $T_j$ are the corresponding test statistics.  Suppose hypotheses 3, 5, and 6 are true.  The subset pivotality condition holds if  $f(T_3, T_5, T_6)$ is the same, regardless of whether all six hypotheses are true, or only hypotheses 3, 5, and 6 are true.  Subset pivotality is satisfied in the common situation where one examines the effect of one treatment on many outcomes.  For more details, see Westfall and Young (1993, pp. 42ff), from which this discussion draws.
+
+## Resampling-based step down procedure
+
+With subset pivotality, one can obtain strong control with the following resampling (i.e. permutation inference or the bootstrap) procedure:
+
+In all steps below, take the absolute value of the t-statistic. For the original data, compute the naive t-statistics $t^\ast_1, \dots, t^\ast_m$ and then order the raw t-values such that $t^\ast_{r_1} \geq t^\ast_{r_2} \geq \dots \geq t^\ast_{r_m}$.  For the *b*th bootstrap iteration, $b = 1, \dots, B$:
+
+1. Compute the raw t-statistics from the bootstrap dataset with complete null hypothesis imposed.
+2. Next define the successive maxima of the bootstrap t-statistics, starting from the t-statistic corresponding to the hypothesis with the smallest naive t-statistic:
+
+  \begin{align*}
+    q_{m,b} &= t_{r_m,b} \\
+    q_{m-1,b} &= \max(q_{m,b}, t_{r_{m-1},b}) \\
+    \vdots \\
+    q_{1,b} &= \max(q_{2,b}, t_{r_1,b})
+  \end{align*}
+  
+  Note that we use t-statistic as our test-statistic in the bootstrap algorithm, which is an asymptotically *pivotal* statistic and thus makes the bootstrap more robust in finite samples. 
+  
+> **Example.** Suppose we have four hypotheses, and the naive t-statistics for $H_1, H_2, H_3$ and $H_4$ from the original dataset are, respectively, 0.5, 2.0, 1.0, 1.5.  Then $r_1 = 2$ (that is, $t^\ast_{r_1} = t^\ast_2$), $r_2 = 4$, $r_3 = 3$, and $r_4 = 1$.  Now, we resample from the original dataset, and suppose we get the following bootstrap t-statistics for $H_1, H_2, H_3$ and $H_4$: 0.7. 1.6, 0.4, 1.2.  We order this vector of t-statistics in the order given by $r_1, r_2, r_3$ and $r_4$ to get 1.6, 1.2, 0.4, 0.7.  Then taking successive maxima (from the right to the left) yields $q_{1b} = 1.6$, $q_{2b} = 1.2$, $q_{3b} = 0.7$, and $q_{4b} = 0.7$.
+
+The above steps are repeated $B$ times and the adjusted *p*-values are estimated by
+
+\[
+  \tilde{p}^\ast_{r_i} = \frac{\sum_{b=1}^B \mathbf{1}[q_{i,b} \geq t^\ast_{r_i}]}{B}
+\]
+
+for $i = 1, \dots, m$, where $1[\cdot]$ is an indicator variable equal to 1 if the condition in the brackets is true, and 0 otherwise.
+
+> **Example (continued).** The adjusted *p*-value for the test of $H_2$, with naive t-statistic 2.0, is $\tilde{p}^\ast_2 = \tilde{p}^\ast_{r_1} = \frac{\sum_{b=1}^B \mathbf{1}[q_{1,b} \geq 2.0]}{B}$.
+
+The procedure is completed by enforcing monotonicity using successive maximization:
+
+  \begin{align*}
+    \tilde{p}^\ast_{r_1} &\leftarrow \tilde{p}^\ast_{r_1} \\
+    \tilde{p}^\ast_{r_2} &\leftarrow \max(\tilde{p}^\ast_{r_1}, \tilde{p}^\ast_{r_2}) \\
+    \vdots \\
+    \tilde{p}^\ast_{r_m} &\leftarrow \max(\tilde{p}^\ast_{r_{m-1}}, \tilde{p}^\ast_{r_m})
+  \end{align*}
+
+> **Example (continued).** Enforcing monotonicity ensures that $\tilde{p}^\ast_2 \leq \tilde{p}^\ast_4 \leq \tilde{p}^\ast_3 \leq \tilde{p}^\ast_1$.
+
+## Resampling Methods
+
+Current, we have implemented two bootstrap methods in `multitestr`: the "pairs" non-parametric bootstrap and the "wild" parametric bootstrap. The "pairs" bootstrap resamples either units or clusters (in the case of clustered errors) to generate boostrap samples. The wild bootstrap resamples from residuals as in the traditional parametric bootstrap, but unlike the traditional parametric bootstrap, allows for heteroskedasticity.  In our implementation, we transform the residuals using the *Rademacher* distribution, as suggested by Cameron, Gelbach, and Miller (2008).
+
+## Simulation
+
+We present a simulation study to compare unadjusted and adjusted *p*-values from multiple hypothesis testing.  There are 300 units in each sample.  We observe 5 outcomes for each unit, drawn from a multivariate normal distribution with mean 0, variance 1, and a correlation between outcomes of 0.8.  Treatment is randomly assigned to half of the units and has no effect on any outcome (so all the null hypotheses are true). There is one covariate drawn from a normal distribution with mean 0 and variance 1.
+
+For each sample, we estimate the effect of treatment on each of the 5 outcomes using OLS.  We reject a null hypothesis if its *p*-value is lower than or equal to 0.05.  In the experiment presented below, we draw 500 samples, and compute the FWER, i.e. the proportion of samples in which at least one null hypothesis was (falsely) rejected.
+
+```{r simulate, cache = TRUE}
+library("multitestr")
+# Set a seed
+set.seed(343)
+
+# Generate correlated outcomes
+# Outcomes are unrelated to treatment
+# All null hypotheses are true
+nsims <- 500
+n <- 300
+k <- 5
+r <- .8
+s <- 1
+
+out <- sapply(1:nsims, function(i) {
+  sigma <- matrix(s * r, k, k)
+  diag(sigma) <- s
+  outcomes <- mvtnorm::rmvnorm(n, mean = rep(0, k), sigma = sigma)
+  covar <- rnorm(n = n)
+
+  # Complete Random Assignment
+  treatment <- sample(rep(0:1, each = n/2), n)
+
+  nom_pvalues <- apply(outcomes, 2, function(Y) {
+    fit <- lm(Y ~ treatment + covar)
+    lmtest::coeftest(fit, sandwich::vcovCL(fit))[2, 4]
+  })
+
+  boot_pvals <- boot_stepdown(null_formulas = c(X1 ~ covar,
+                                                X2 ~ covar,
+                                                X3 ~ covar,
+                                                X4 ~ covar,
+                                                X5 ~ covar),
+                              full_formulas = c(X1 ~ treatment + covar,
+                                                X2 ~ treatment + covar,
+                                                X3 ~ treatment + covar,
+                                                X4 ~ treatment + covar,
+                                                X5 ~ treatment + covar),
+                              data = data.frame(treatment, outcomes, covar),
+                              coef_list = rep("treatment", k),
+                              nboots = 200,
+                              parallel = FALSE, pb = FALSE,
+                              boot_type = "pairs")$bs_pvalues_adjusted
+
+  c(nominal = any(nom_pvalues <= .05),
+    holm = any(p.adjust(nom_pvalues, method = "holm") <= .05),
+    boot = any(boot_pvals <= .05))
+
+})
+
+apply(out, MAR = 1, mean)
+```
+
+We compare the FWER across three types of *p*-values: unadjusted (`nominal`) *p*-values, *p*-values adjusted using the Holm (1979) method (`holm`), and *p*-values adjusted using the Westfall and Young (1993) resampling-based (bootstrapped) step down procedure presented above (`boot`). The FWER using nominal *p*-values exceeds 0.05.  Both the Holm and the bootstrapped step-down methods produce Type I errors in 0.05 or less of all samples (i.e. they successfully control the FWER at $\alpha = 0.05$), but the Holm method is more conservative and hence less powerful.
+
+
+## Application
+
+To demonstrate `multitestr`'s functionality, we reproduce (up to sampling error) some results from Casey et al (2012).  The study estimates the effect of a ``community-driven development'' program on 12 composite outcomes in Sierra Leone. 
+
+The user must specify a list of `full_formulas` and `null_formulas`, where the `full_formulas` are the full regression models being tested and  `null_formulas` are models under the null hypothesis. In this particular case, the `full_formulas` are formulas with 12 different outcome variables (`z_score_1`...`z_score_12`), the treatment variable (`t`), pre-treatment covariates (`tothhs` and `road`), and strata fixed effects (`ward`).  The `null_formulas` are the corresponding models without a treatment variable, since the null hyptothesis is that the treatment had no effect. 
+
+```{r replicate, cache = TRUE}
+# Replicate Casey et al 2012, Table II Column 3
+set.seed(123)
+F <- lapply(sprintf("zscore_%d ~ 0 + t + tothhs + road + ward", 1:12),
+            as.formula)
+pvals <- boot_stepdown(full_formulas = F,
+                       null_formulas = lapply(F, update, . ~ . - t),
+                       data = gobifo,
+                       coef_list = "t",
+                       nboots = 1000,
+                       parallel = FALSE, 
+                       boot_type = "pairs")
+dplyr::mutate_if(pvals, is.numeric, round, 3)
+```
+
+`bs_pvalues_unadjusted` are the bootstrap-based p-values with no adjustment for mutltiple testing. `bs_pvalues_adjusted` have been adjusted for multiple testing using the algorithm described in Westfall and Young (1993).
+
+
+### Subgroup Analysis
+
+A frequent use case for multiple testing adjustment is hypothesis testing across multiple subgroups. To specify different subgroups, use the `weights` parameter to pass different sets of weights corresponding to the subgroups of interest. For example, if we were interested in estimating the effect of treatment in 4 different population-based subgroups on outcome `zscore_6`, we would create a list of 4 different set of weights, where each list element is comprised of a different set of weights. Each set of weights corresponds to a different subgroup of interest, such that units belonging to the subgroup of interest receive a weight of 1, while other units receive a weight of 0. 
+
+```{r subgroup, cache = TRUE}
+F <-  lapply(as.list(rep("zscore_6 ~ 0 + t  + road + ward", 4)), as.formula)
+weights_list <- list()
+#Define subgroups by the variable "tothhs"
+weights_list[[1]] <- ifelse(gobifo$tothhs <= quantile(gobifo$tothhs, .25), 1, 0)
+weights_list[[2]] <- ifelse(gobifo$tothhs > quantile(gobifo$tothhs, .25) & 
+                            gobifo$tothhs <= quantile(gobifo$tothhs, .5), 1, 0)
+weights_list[[3]] <- ifelse(gobifo$tothhs > quantile(gobifo$tothhs, .5) & 
+                            gobifo$tothhs <= quantile(gobifo$tothhs, .75), 1, 0)
+weights_list[[4]] <- ifelse(gobifo$tothhs > quantile(gobifo$tothhs, .75), 1, 0)
+pvals <- boot_stepdown(full_formulas = F,
+                       null_formulas = lapply(F, update, . ~ . - t),
+                       data = gobifo,
+                       coef_list = "t",
+                       weights = weights_list, 
+                       nboots = 1000,
+                       parallel = FALSE, 
+                       boot_type = "wild")
+dplyr::mutate_if(pvals, is.numeric, round, 3)
+```
+
+
+<!-- Results: -->
+
+<!-- |Hypothesis    |Variable | bs_pvalues_unadjusted| bs_pvalues_adjusted| -->
+<!-- |:-------------|:--------|---------------------:|-------------------:| -->
+<!-- |Hypothesis 1  |t        |                 0.010|               0.010| -->
+<!-- |Hypothesis 2  |t        |                 0.010|               0.010| -->
+<!-- |Hypothesis 3  |t        |                 0.010|               0.010| -->
+<!-- |Hypothesis 4  |t        |                 0.693|               0.980| -->
+<!-- |Hypothesis 5  |t        |                 0.970|               0.980| -->
+<!-- |Hypothesis 6  |t        |                 0.208|               0.673| -->
+<!-- |Hypothesis 7  |t        |                 0.356|               0.931| -->
+<!-- |Hypothesis 8  |t        |                 0.465|               0.931| -->
+<!-- |Hypothesis 9  |t        |                 0.366|               0.931| -->
+<!-- |Hypothesis 10 |t        |                 0.069|               0.347| -->
+<!-- |Hypothesis 11 |t        |                 0.782|               0.980| -->
+<!-- |Hypothesis 12 |t        |                 0.347|               0.931| -->
+
+## References
+
+Bertz, Frank, Torsten Hothorn, and Peter Westfall. 2011. *Multiple Comparisons Using R.* Boca Raton: Chapman & Hall/CRC.
+
+Cameron, Colin, Johah Gelbach, and Douglas Miller. 2008. "Bootstrap-based Improvements For Inference With Clustered Errors". *The Review of Economics and Statistics.* 900(3):414-427. 
+
+Casey, Katherine, Rachel Glennerster, and Edward Miguel. 2012. "Reshaping Institutions: Evidence on Aid Impacts Using a Preanalysis Plan". *Quarterly Journal of Economics.* 127(4):1755-1812.
+
+Holm, S. 1979. "A simple sequentially rejective multiple test procedure". *Scandinavian Journal of Statistics.* 6(2):65–70. 
+
+Westfall, Peter H., and S. Stanley Young. 1993. *Resampling-Based Multiple Testing: Examples and Methods for P-Value Adjustment.* New York: John Wiley & Sons.
