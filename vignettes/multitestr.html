@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="F. Daniel Hidalgo and Weihuang Wong" />
+
+<meta name="date" content="2018-10-09" />
+
+<title>Free Step-down Adjusted p-values</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(data-line-number);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#header {
+text-align: center;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Free Step-down Adjusted <em>p</em>-values</h1>
+<h4 class="author"><em>F. Daniel Hidalgo and Weihuang Wong</em></h4>
+<h4 class="date"><em>2018-10-09</em></h4>
+
+
+
+<p>If multiple hypotheses, <span class="math inline">\(m\)</span>, are tested simultaneously, the probability of false positives increases in <span class="math inline">\(m\)</span>. If the test statistics used are independent of one another, the probability of incorrectly rejecting at least one null hypothesis at the <span class="math inline">\(\alpha\)</span> level of significance is <span class="math inline">\(1 - (1 - \alpha)^m\)</span>.</p>
+<p>In this package, we implement the Westfall and Young procedure to control the <em>familywise error rate</em> (FWER) for a family of hypotheses. In this vignette, we describe the concept of a FWER. We then introduce the Westfall and Young resampling-based step down procedure for adjusting <em>p</em>-values to control the FWER. We use Monte Carlo simulation to demonstrate how the FWER differs when different methods are used to adjust <em>p</em>-values. Finally, we reproduce results from an empirical study to illustrate how the <code>boot_stepdown</code> function can used to generate adjusted <em>p</em>-values.</p>
+<p>For a thorough discussion of error rates, we refer readers to Bertz, Hothorn, and Westfall (2011, Chapter 2). The exposition in this vignette draws on that chapter.</p>
+<div id="controlling-the-familywise-error-rate" class="section level2">
+<h2>Controlling the familywise error rate</h2>
+<p>Let <span class="math inline">\(V\)</span> be a random variable representing the number of Type I errors or false positives, i.e. the number of hypotheses from a total of <span class="math inline">\(m\)</span> hypotheses that are rejected but are in fact true. The familywise error rate (FWER) is defined as</p>
+<p><span class="math display">\[
+\textrm{FWER} = \Pr(V &gt; 0),
+\]</span></p>
+<p>the probability of committing at least one Type I error. We say that FWER is controlled at the level <span class="math inline">\(\alpha\)</span> if we can assure that <span class="math inline">\(\textrm{FWER} \leq \alpha\)</span>.</p>
+<div id="strong-and-weak-control" class="section level3">
+<h3>Strong and weak control</h3>
+<p>We are interested in a multiple testing procedure that strongly controls the FWER. Error control is <em>weak</em> if the Type I error rate (in our case, the FWER) is only controlled under the global null hypothesis,</p>
+<p><span class="math display">\[
+H = \bigcap_{i \in M_0} H_i, \quad M_0 = M.
+\]</span></p>
+<p><span class="math inline">\(M_0\)</span> refers to the set of true hypotheses, and <span class="math inline">\(M\)</span> the set of all hypotheses (true or false) respectively, so <span class="math inline">\(H\)</span> is the event that all null hypotheses <span class="math inline">\(H_1, H_2, \dots, H_m\)</span> are true. Error control is <em>strong</em> for a given multiple testing procedure if the Type I error rate is controlled under any configuration of true and false null hypotheses. Strong control of the FWER at the <span class="math inline">\(\alpha\)</span> level requires that</p>
+<p><span class="math display">\[
+\max_{I \subseteq M} \Pr \bigg( V &gt; 0 \bigg| \bigcap_{i \in I} H_i \bigg) \leq \alpha
+\]</span></p>
+<p>where the maximum is taken over all possible configurations <span class="math inline">\(\emptyset \neq I \subseteq M\)</span> of true null hypotheses.</p>
+<p>Westfall and Young (1993) show that under some assumptions, in particular the <em>subset pivotality</em> assumption, resampling-based methods can control FWER in the strong sense. A vector of test statistics <span class="math inline">\(\mathbf{T}\)</span> for the set of hypotheses <span class="math inline">\(M\)</span> has the subset pivotality property if the joint distribution of any subvector of <span class="math inline">\(\mathbf{T}\)</span>, corresponding to a subset of true null hypotheses, does not depend on the truth or falsehood of hypotheses corresponding to test statistics not in the vector.</p>
+<p>Suppose we ran an experiment and measured 6 different outcomes for each subject, <span class="math inline">\(\mathbf{Y}_i^\top = (Y_{i1}, Y_{i2}, \dots Y_{i6})\)</span>, <span class="math inline">\(i = 1, \dots, n\)</span>. Let the effect of treatment on outcome <span class="math inline">\(j\)</span> be <span class="math inline">\(\beta_j\)</span>, so that our hypotheses of interest are <span class="math inline">\(H_j: \beta_j = 0\)</span> for <span class="math inline">\(j = 1, \dots, 6\)</span> and <span class="math inline">\(T_j\)</span> are the corresponding test statistics. Suppose hypotheses 3, 5, and 6 are true. The subset pivotality condition holds if <span class="math inline">\(f(T_3, T_5, T_6)\)</span> is the same, regardless of whether all six hypotheses are true, or only hypotheses 3, 5, and 6 are true. Subset pivotality is satisfied in the common situation where one examines the effect of one treatment on many outcomes. For more details, see Westfall and Young (1993, pp. 42ff), from which this discussion draws.</p>
+</div>
+</div>
+<div id="resampling-based-step-down-procedure" class="section level2">
+<h2>Resampling-based step down procedure</h2>
+<p>With subset pivotality, one can obtain strong control with the following resampling (i.e. permutation inference or the bootstrap) procedure:</p>
+<p>In all steps below, take the absolute value of the t-statistic. For the original data, compute the naive t-statistics <span class="math inline">\(t^\ast_1, \dots, t^\ast_m\)</span> and then order the raw t-values such that <span class="math inline">\(t^\ast_{r_1} \geq t^\ast_{r_2} \geq \dots \geq t^\ast_{r_m}\)</span>. For the <em>b</em>th bootstrap iteration, <span class="math inline">\(b = 1, \dots, B\)</span>:</p>
+<ol style="list-style-type: decimal">
+<li>Compute the raw t-statistics from the bootstrap dataset with complete null hypothesis imposed.</li>
+<li>Next define the successive maxima of the bootstrap t-statistics, starting from the t-statistic corresponding to the hypothesis with the smallest naive t-statistic:</li>
+</ol>
+<p><span class="math display">\[\begin{align*}
+    q_{m,b} &amp;= t_{r_m,b} \\
+    q_{m-1,b} &amp;= \max(q_{m,b}, t_{r_{m-1},b}) \\
+    \vdots \\
+    q_{1,b} &amp;= \max(q_{2,b}, t_{r_1,b})
+  \end{align*}\]</span></p>
+<p>Note that we use t-statistic as our test-statistic in the bootstrap algorithm, which is an asymptotically <em>pivotal</em> statistic and thus makes the bootstrap more robust in finite samples.</p>
+<blockquote>
+<p><strong>Example.</strong> Suppose we have four hypotheses, and the naive t-statistics for <span class="math inline">\(H_1, H_2, H_3\)</span> and <span class="math inline">\(H_4\)</span> from the original dataset are, respectively, 0.5, 2.0, 1.0, 1.5. Then <span class="math inline">\(r_1 = 2\)</span> (that is, <span class="math inline">\(t^\ast_{r_1} = t^\ast_2\)</span>), <span class="math inline">\(r_2 = 4\)</span>, <span class="math inline">\(r_3 = 3\)</span>, and <span class="math inline">\(r_4 = 1\)</span>. Now, we resample from the original dataset, and suppose we get the following bootstrap t-statistics for <span class="math inline">\(H_1, H_2, H_3\)</span> and <span class="math inline">\(H_4\)</span>: 0.7. 1.6, 0.4, 1.2. We order this vector of t-statistics in the order given by <span class="math inline">\(r_1, r_2, r_3\)</span> and <span class="math inline">\(r_4\)</span> to get 1.6, 1.2, 0.4, 0.7. Then taking successive maxima (from the right to the left) yields <span class="math inline">\(q_{1b} = 1.6\)</span>, <span class="math inline">\(q_{2b} = 1.2\)</span>, <span class="math inline">\(q_{3b} = 0.7\)</span>, and <span class="math inline">\(q_{4b} = 0.7\)</span>.</p>
+</blockquote>
+<p>The above steps are repeated <span class="math inline">\(B\)</span> times and the adjusted <em>p</em>-values are estimated by</p>
+<p><span class="math display">\[
+  \tilde{p}^\ast_{r_i} = \frac{\sum_{b=1}^B \mathbf{1}[q_{i,b} \geq t^\ast_{r_i}]}{B}
+\]</span></p>
+<p>for <span class="math inline">\(i = 1, \dots, m\)</span>, where <span class="math inline">\(1[\cdot]\)</span> is an indicator variable equal to 1 if the condition in the brackets is true, and 0 otherwise.</p>
+<blockquote>
+<p><strong>Example (continued).</strong> The adjusted <em>p</em>-value for the test of <span class="math inline">\(H_2\)</span>, with naive t-statistic 2.0, is <span class="math inline">\(\tilde{p}^\ast_2 = \tilde{p}^\ast_{r_1} = \frac{\sum_{b=1}^B \mathbf{1}[q_{1,b} \geq 2.0]}{B}\)</span>.</p>
+</blockquote>
+<p>The procedure is completed by enforcing monotonicity using successive maximization:</p>
+<p><span class="math display">\[\begin{align*}
+    \tilde{p}^\ast_{r_1} &amp;\leftarrow \tilde{p}^\ast_{r_1} \\
+    \tilde{p}^\ast_{r_2} &amp;\leftarrow \max(\tilde{p}^\ast_{r_1}, \tilde{p}^\ast_{r_2}) \\
+    \vdots \\
+    \tilde{p}^\ast_{r_m} &amp;\leftarrow \max(\tilde{p}^\ast_{r_{m-1}}, \tilde{p}^\ast_{r_m})
+  \end{align*}\]</span></p>
+<blockquote>
+<p><strong>Example (continued).</strong> Enforcing monotonicity ensures that <span class="math inline">\(\tilde{p}^\ast_2 \leq \tilde{p}^\ast_4 \leq \tilde{p}^\ast_3 \leq \tilde{p}^\ast_1\)</span>.</p>
+</blockquote>
+</div>
+<div id="resampling-methods" class="section level2">
+<h2>Resampling Methods</h2>
+<p>Current, we have implemented two bootstrap methods in <code>multitestr</code>: the “pairs” non-parametric bootstrap and the “wild” parametric bootstrap. The “pairs” bootstrap resamples either units or clusters (in the case of clustered errors) to generate boostrap samples. The wild bootstrap resamples from residuals as in the traditional parametric bootstrap, but unlike the traditional parametric bootstrap, allows for heteroskedasticity. In our implementation, we transform the residuals using the <em>Rademacher</em> distribution, as suggested by Cameron, Gelbach, and Miller (2008).</p>
+</div>
+<div id="simulation" class="section level2">
+<h2>Simulation</h2>
+<p>We present a simulation study to compare unadjusted and adjusted <em>p</em>-values from multiple hypothesis testing. There are 300 units in each sample. We observe 5 outcomes for each unit, drawn from a multivariate normal distribution with mean 0, variance 1, and a correlation between outcomes of 0.8. Treatment is randomly assigned to half of the units and has no effect on any outcome (so all the null hypotheses are true). There is one covariate drawn from a normal distribution with mean 0 and variance 1.</p>
+<p>For each sample, we estimate the effect of treatment on each of the 5 outcomes using OLS. We reject a null hypothesis if its <em>p</em>-value is lower than or equal to 0.05. In the experiment presented below, we draw 500 samples, and compute the FWER, i.e. the proportion of samples in which at least one null hypothesis was (falsely) rejected.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw">library</span>(<span class="st">&quot;multitestr&quot;</span>)</a>
+<a class="sourceLine" id="cb1-2" data-line-number="2"><span class="co"># Set a seed</span></a>
+<a class="sourceLine" id="cb1-3" data-line-number="3"><span class="kw">set.seed</span>(<span class="dv">343</span>)</a>
+<a class="sourceLine" id="cb1-4" data-line-number="4"></a>
+<a class="sourceLine" id="cb1-5" data-line-number="5"><span class="co"># Generate correlated outcomes</span></a>
+<a class="sourceLine" id="cb1-6" data-line-number="6"><span class="co"># Outcomes are unrelated to treatment</span></a>
+<a class="sourceLine" id="cb1-7" data-line-number="7"><span class="co"># All null hypotheses are true</span></a>
+<a class="sourceLine" id="cb1-8" data-line-number="8">nsims &lt;-<span class="st"> </span><span class="dv">500</span></a>
+<a class="sourceLine" id="cb1-9" data-line-number="9">n &lt;-<span class="st"> </span><span class="dv">300</span></a>
+<a class="sourceLine" id="cb1-10" data-line-number="10">k &lt;-<span class="st"> </span><span class="dv">5</span></a>
+<a class="sourceLine" id="cb1-11" data-line-number="11">r &lt;-<span class="st"> </span><span class="fl">.8</span></a>
+<a class="sourceLine" id="cb1-12" data-line-number="12">s &lt;-<span class="st"> </span><span class="dv">1</span></a>
+<a class="sourceLine" id="cb1-13" data-line-number="13"></a>
+<a class="sourceLine" id="cb1-14" data-line-number="14">out &lt;-<span class="st"> </span><span class="kw">sapply</span>(<span class="dv">1</span><span class="op">:</span>nsims, <span class="cf">function</span>(i) {</a>
+<a class="sourceLine" id="cb1-15" data-line-number="15">  sigma &lt;-<span class="st"> </span><span class="kw">matrix</span>(s <span class="op">*</span><span class="st"> </span>r, k, k)</a>
+<a class="sourceLine" id="cb1-16" data-line-number="16">  <span class="kw">diag</span>(sigma) &lt;-<span class="st"> </span>s</a>
+<a class="sourceLine" id="cb1-17" data-line-number="17">  outcomes &lt;-<span class="st"> </span>mvtnorm<span class="op">::</span><span class="kw">rmvnorm</span>(n, <span class="dt">mean =</span> <span class="kw">rep</span>(<span class="dv">0</span>, k), <span class="dt">sigma =</span> sigma)</a>
+<a class="sourceLine" id="cb1-18" data-line-number="18">  covar &lt;-<span class="st"> </span><span class="kw">rnorm</span>(<span class="dt">n =</span> n)</a>
+<a class="sourceLine" id="cb1-19" data-line-number="19"></a>
+<a class="sourceLine" id="cb1-20" data-line-number="20">  <span class="co"># Complete Random Assignment</span></a>
+<a class="sourceLine" id="cb1-21" data-line-number="21">  treatment &lt;-<span class="st"> </span><span class="kw">sample</span>(<span class="kw">rep</span>(<span class="dv">0</span><span class="op">:</span><span class="dv">1</span>, <span class="dt">each =</span> n<span class="op">/</span><span class="dv">2</span>), n)</a>
+<a class="sourceLine" id="cb1-22" data-line-number="22"></a>
+<a class="sourceLine" id="cb1-23" data-line-number="23">  nom_pvalues &lt;-<span class="st"> </span><span class="kw">apply</span>(outcomes, <span class="dv">2</span>, <span class="cf">function</span>(Y) {</a>
+<a class="sourceLine" id="cb1-24" data-line-number="24">    fit &lt;-<span class="st"> </span><span class="kw">lm</span>(Y <span class="op">~</span><span class="st"> </span>treatment <span class="op">+</span><span class="st"> </span>covar)</a>
+<a class="sourceLine" id="cb1-25" data-line-number="25">    lmtest<span class="op">::</span><span class="kw">coeftest</span>(fit, sandwich<span class="op">::</span><span class="kw">vcovCL</span>(fit))[<span class="dv">2</span>, <span class="dv">4</span>]</a>
+<a class="sourceLine" id="cb1-26" data-line-number="26">  })</a>
+<a class="sourceLine" id="cb1-27" data-line-number="27"></a>
+<a class="sourceLine" id="cb1-28" data-line-number="28">  boot_pvals &lt;-<span class="st"> </span><span class="kw">boot_stepdown</span>(<span class="dt">null_formulas =</span> <span class="kw">c</span>(X1 <span class="op">~</span><span class="st"> </span>covar,</a>
+<a class="sourceLine" id="cb1-29" data-line-number="29">                                                X2 <span class="op">~</span><span class="st"> </span>covar,</a>
+<a class="sourceLine" id="cb1-30" data-line-number="30">                                                X3 <span class="op">~</span><span class="st"> </span>covar,</a>
+<a class="sourceLine" id="cb1-31" data-line-number="31">                                                X4 <span class="op">~</span><span class="st"> </span>covar,</a>
+<a class="sourceLine" id="cb1-32" data-line-number="32">                                                X5 <span class="op">~</span><span class="st"> </span>covar),</a>
+<a class="sourceLine" id="cb1-33" data-line-number="33">                              <span class="dt">full_formulas =</span> <span class="kw">c</span>(X1 <span class="op">~</span><span class="st"> </span>treatment <span class="op">+</span><span class="st"> </span>covar,</a>
+<a class="sourceLine" id="cb1-34" data-line-number="34">                                                X2 <span class="op">~</span><span class="st"> </span>treatment <span class="op">+</span><span class="st"> </span>covar,</a>
+<a class="sourceLine" id="cb1-35" data-line-number="35">                                                X3 <span class="op">~</span><span class="st"> </span>treatment <span class="op">+</span><span class="st"> </span>covar,</a>
+<a class="sourceLine" id="cb1-36" data-line-number="36">                                                X4 <span class="op">~</span><span class="st"> </span>treatment <span class="op">+</span><span class="st"> </span>covar,</a>
+<a class="sourceLine" id="cb1-37" data-line-number="37">                                                X5 <span class="op">~</span><span class="st"> </span>treatment <span class="op">+</span><span class="st"> </span>covar),</a>
+<a class="sourceLine" id="cb1-38" data-line-number="38">                              <span class="dt">data =</span> <span class="kw">data.frame</span>(treatment, outcomes, covar),</a>
+<a class="sourceLine" id="cb1-39" data-line-number="39">                              <span class="dt">coef_list =</span> <span class="kw">rep</span>(<span class="st">&quot;treatment&quot;</span>, k),</a>
+<a class="sourceLine" id="cb1-40" data-line-number="40">                              <span class="dt">nboots =</span> <span class="dv">200</span>,</a>
+<a class="sourceLine" id="cb1-41" data-line-number="41">                              <span class="dt">parallel =</span> <span class="ot">FALSE</span>, <span class="dt">pb =</span> <span class="ot">FALSE</span>,</a>
+<a class="sourceLine" id="cb1-42" data-line-number="42">                              <span class="dt">boot_type =</span> <span class="st">&quot;pairs&quot;</span>)<span class="op">$</span>bs_pvalues_adjusted</a>
+<a class="sourceLine" id="cb1-43" data-line-number="43"></a>
+<a class="sourceLine" id="cb1-44" data-line-number="44">  <span class="kw">c</span>(<span class="dt">nominal =</span> <span class="kw">any</span>(nom_pvalues <span class="op">&lt;=</span><span class="st"> </span><span class="fl">.05</span>),</a>
+<a class="sourceLine" id="cb1-45" data-line-number="45">    <span class="dt">holm =</span> <span class="kw">any</span>(<span class="kw">p.adjust</span>(nom_pvalues, <span class="dt">method =</span> <span class="st">&quot;holm&quot;</span>) <span class="op">&lt;=</span><span class="st"> </span><span class="fl">.05</span>),</a>
+<a class="sourceLine" id="cb1-46" data-line-number="46">    <span class="dt">boot =</span> <span class="kw">any</span>(boot_pvals <span class="op">&lt;=</span><span class="st"> </span><span class="fl">.05</span>))</a>
+<a class="sourceLine" id="cb1-47" data-line-number="47"></a>
+<a class="sourceLine" id="cb1-48" data-line-number="48">})</a>
+<a class="sourceLine" id="cb1-49" data-line-number="49"></a>
+<a class="sourceLine" id="cb1-50" data-line-number="50"><span class="kw">apply</span>(out, <span class="dt">MAR =</span> <span class="dv">1</span>, mean)</a>
+<a class="sourceLine" id="cb1-51" data-line-number="51"><span class="co">#&gt; nominal    holm    boot </span></a>
+<a class="sourceLine" id="cb1-52" data-line-number="52"><span class="co">#&gt;   0.150   0.032   0.050</span></a></code></pre></div>
+<p>We compare the FWER across three types of <em>p</em>-values: unadjusted (<code>nominal</code>) <em>p</em>-values, <em>p</em>-values adjusted using the Holm (1979) method (<code>holm</code>), and <em>p</em>-values adjusted using the Westfall and Young (1993) resampling-based (bootstrapped) step down procedure presented above (<code>boot</code>). The FWER using nominal <em>p</em>-values exceeds 0.05. Both the Holm and the bootstrapped step-down methods produce Type I errors in 0.05 or less of all samples (i.e. they successfully control the FWER at <span class="math inline">\(\alpha = 0.05\)</span>), but the Holm method is more conservative and hence less powerful.</p>
+</div>
+<div id="application" class="section level2">
+<h2>Application</h2>
+<p>To demonstrate <code>multitestr</code>‘s functionality, we reproduce (up to sampling error) some results from Casey et al (2012). The study estimates the effect of a ``community-driven development’’ program on 12 composite outcomes in Sierra Leone.</p>
+<p>The user must specify a list of <code>full_formulas</code> and <code>null_formulas</code>, where the <code>full_formulas</code> are the full regression models being tested and <code>null_formulas</code> are models under the null hypothesis. In this particular case, the <code>full_formulas</code> are formulas with 12 different outcome variables (<code>z_score_1</code>…<code>z_score_12</code>), the treatment variable (<code>t</code>), pre-treatment covariates (<code>tothhs</code> and <code>road</code>), and strata fixed effects (<code>ward</code>). The <code>null_formulas</code> are the corresponding models without a treatment variable, since the null hyptothesis is that the treatment had no effect.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="co"># Replicate Casey et al 2012, Table II Column 3</span></a>
+<a class="sourceLine" id="cb2-2" data-line-number="2"><span class="kw">set.seed</span>(<span class="dv">123</span>)</a>
+<a class="sourceLine" id="cb2-3" data-line-number="3">F &lt;-<span class="st"> </span><span class="kw">lapply</span>(<span class="kw">sprintf</span>(<span class="st">&quot;zscore_%d ~ 0 + t + tothhs + road + ward&quot;</span>, <span class="dv">1</span><span class="op">:</span><span class="dv">12</span>),</a>
+<a class="sourceLine" id="cb2-4" data-line-number="4">            as.formula)</a>
+<a class="sourceLine" id="cb2-5" data-line-number="5">pvals &lt;-<span class="st"> </span><span class="kw">boot_stepdown</span>(<span class="dt">full_formulas =</span> F,</a>
+<a class="sourceLine" id="cb2-6" data-line-number="6">                       <span class="dt">null_formulas =</span> <span class="kw">lapply</span>(F, update, . <span class="op">~</span><span class="st"> </span>. <span class="op">-</span><span class="st"> </span>t),</a>
+<a class="sourceLine" id="cb2-7" data-line-number="7">                       <span class="dt">data =</span> gobifo,</a>
+<a class="sourceLine" id="cb2-8" data-line-number="8">                       <span class="dt">coef_list =</span> <span class="st">&quot;t&quot;</span>,</a>
+<a class="sourceLine" id="cb2-9" data-line-number="9">                       <span class="dt">nboots =</span> <span class="dv">1000</span>,</a>
+<a class="sourceLine" id="cb2-10" data-line-number="10">                       <span class="dt">parallel =</span> <span class="ot">FALSE</span>, </a>
+<a class="sourceLine" id="cb2-11" data-line-number="11">                       <span class="dt">boot_type =</span> <span class="st">&quot;pairs&quot;</span>)</a>
+<a class="sourceLine" id="cb2-12" data-line-number="12"><span class="co">#&gt; ===========================================================================</span></a>
+<a class="sourceLine" id="cb2-13" data-line-number="13">dplyr<span class="op">::</span><span class="kw">mutate_if</span>(pvals, is.numeric, round, <span class="dv">3</span>)</a>
+<a class="sourceLine" id="cb2-14" data-line-number="14"><span class="co">#&gt;       Hypothesis Variable bs_pvalues_unadjusted bs_pvalues_adjusted</span></a>
+<a class="sourceLine" id="cb2-15" data-line-number="15"><span class="co">#&gt; 1   Hypothesis 1        t                 0.001               0.001</span></a>
+<a class="sourceLine" id="cb2-16" data-line-number="16"><span class="co">#&gt; 2   Hypothesis 2        t                 0.001               0.001</span></a>
+<a class="sourceLine" id="cb2-17" data-line-number="17"><span class="co">#&gt; 3   Hypothesis 3        t                 0.001               0.001</span></a>
+<a class="sourceLine" id="cb2-18" data-line-number="18"><span class="co">#&gt; 4   Hypothesis 4        t                 0.738               0.981</span></a>
+<a class="sourceLine" id="cb2-19" data-line-number="19"><span class="co">#&gt; 5   Hypothesis 5        t                 0.938               0.981</span></a>
+<a class="sourceLine" id="cb2-20" data-line-number="20"><span class="co">#&gt; 6   Hypothesis 6        t                 0.134               0.677</span></a>
+<a class="sourceLine" id="cb2-21" data-line-number="21"><span class="co">#&gt; 7   Hypothesis 7        t                 0.359               0.915</span></a>
+<a class="sourceLine" id="cb2-22" data-line-number="22"><span class="co">#&gt; 8   Hypothesis 8        t                 0.452               0.915</span></a>
+<a class="sourceLine" id="cb2-23" data-line-number="23"><span class="co">#&gt; 9   Hypothesis 9        t                 0.312               0.910</span></a>
+<a class="sourceLine" id="cb2-24" data-line-number="24"><span class="co">#&gt; 10 Hypothesis 10        t                 0.043               0.348</span></a>
+<a class="sourceLine" id="cb2-25" data-line-number="25"><span class="co">#&gt; 11 Hypothesis 11        t                 0.839               0.981</span></a>
+<a class="sourceLine" id="cb2-26" data-line-number="26"><span class="co">#&gt; 12 Hypothesis 12        t                 0.357               0.915</span></a></code></pre></div>
+<p><code>bs_pvalues_unadjusted</code> are the bootstrap-based p-values with no adjustment for mutltiple testing. <code>bs_pvalues_adjusted</code> have been adjusted for multiple testing using the algorithm described in Westfall and Young (1993).</p>
+<div id="subgroup-analysis" class="section level3">
+<h3>Subgroup Analysis</h3>
+<p>A frequent use case for multiple testing adjustment is hypothesis testing across multiple subgroups. To specify different subgroups, use the <code>weights</code> parameter to pass different sets of weights corresponding to the subgroups of interest. For example, if we were interested in estimating the effect of treatment in 4 different population-based subgroups on outcome <code>zscore_6</code>, we would create a list of 4 different set of weights, where each list element is comprised of a different set of weights. Each set of weights corresponds to a different subgroup of interest, such that units belonging to the subgroup of interest receive a weight of 1, while other units receive a weight of 0.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1">F &lt;-<span class="st">  </span><span class="kw">lapply</span>(<span class="kw">as.list</span>(<span class="kw">rep</span>(<span class="st">&quot;zscore_6 ~ 0 + t  + road + ward&quot;</span>, <span class="dv">4</span>)), as.formula)</a>
+<a class="sourceLine" id="cb3-2" data-line-number="2">weights_list &lt;-<span class="st"> </span><span class="kw">list</span>()</a>
+<a class="sourceLine" id="cb3-3" data-line-number="3"><span class="co">#Define subgroups by the variable &quot;tothhs&quot;</span></a>
+<a class="sourceLine" id="cb3-4" data-line-number="4">weights_list[[<span class="dv">1</span>]] &lt;-<span class="st"> </span><span class="kw">ifelse</span>(gobifo<span class="op">$</span>tothhs <span class="op">&lt;=</span><span class="st"> </span><span class="kw">quantile</span>(gobifo<span class="op">$</span>tothhs, <span class="fl">.25</span>), <span class="dv">1</span>, <span class="dv">0</span>)</a>
+<a class="sourceLine" id="cb3-5" data-line-number="5">weights_list[[<span class="dv">2</span>]] &lt;-<span class="st"> </span><span class="kw">ifelse</span>(gobifo<span class="op">$</span>tothhs <span class="op">&gt;</span><span class="st"> </span><span class="kw">quantile</span>(gobifo<span class="op">$</span>tothhs, <span class="fl">.25</span>) <span class="op">&amp;</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb3-6" data-line-number="6"><span class="st">                            </span>gobifo<span class="op">$</span>tothhs <span class="op">&lt;=</span><span class="st"> </span><span class="kw">quantile</span>(gobifo<span class="op">$</span>tothhs, <span class="fl">.5</span>), <span class="dv">1</span>, <span class="dv">0</span>)</a>
+<a class="sourceLine" id="cb3-7" data-line-number="7">weights_list[[<span class="dv">3</span>]] &lt;-<span class="st"> </span><span class="kw">ifelse</span>(gobifo<span class="op">$</span>tothhs <span class="op">&gt;</span><span class="st"> </span><span class="kw">quantile</span>(gobifo<span class="op">$</span>tothhs, <span class="fl">.5</span>) <span class="op">&amp;</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb3-8" data-line-number="8"><span class="st">                            </span>gobifo<span class="op">$</span>tothhs <span class="op">&lt;=</span><span class="st"> </span><span class="kw">quantile</span>(gobifo<span class="op">$</span>tothhs, <span class="fl">.75</span>), <span class="dv">1</span>, <span class="dv">0</span>)</a>
+<a class="sourceLine" id="cb3-9" data-line-number="9">weights_list[[<span class="dv">4</span>]] &lt;-<span class="st"> </span><span class="kw">ifelse</span>(gobifo<span class="op">$</span>tothhs <span class="op">&gt;</span><span class="st"> </span><span class="kw">quantile</span>(gobifo<span class="op">$</span>tothhs, <span class="fl">.75</span>), <span class="dv">1</span>, <span class="dv">0</span>)</a>
+<a class="sourceLine" id="cb3-10" data-line-number="10">pvals &lt;-<span class="st"> </span><span class="kw">boot_stepdown</span>(<span class="dt">full_formulas =</span> F,</a>
+<a class="sourceLine" id="cb3-11" data-line-number="11">                       <span class="dt">null_formulas =</span> <span class="kw">lapply</span>(F, update, . <span class="op">~</span><span class="st"> </span>. <span class="op">-</span><span class="st"> </span>t),</a>
+<a class="sourceLine" id="cb3-12" data-line-number="12">                       <span class="dt">data =</span> gobifo,</a>
+<a class="sourceLine" id="cb3-13" data-line-number="13">                       <span class="dt">coef_list =</span> <span class="st">&quot;t&quot;</span>,</a>
+<a class="sourceLine" id="cb3-14" data-line-number="14">                       <span class="dt">weights =</span> weights_list, </a>
+<a class="sourceLine" id="cb3-15" data-line-number="15">                       <span class="dt">nboots =</span> <span class="dv">1000</span>,</a>
+<a class="sourceLine" id="cb3-16" data-line-number="16">                       <span class="dt">parallel =</span> <span class="ot">FALSE</span>, </a>
+<a class="sourceLine" id="cb3-17" data-line-number="17">                       <span class="dt">boot_type =</span> <span class="st">&quot;wild&quot;</span>)</a>
+<a class="sourceLine" id="cb3-18" data-line-number="18"><span class="co">#&gt; ===========================================================================</span></a>
+<a class="sourceLine" id="cb3-19" data-line-number="19">dplyr<span class="op">::</span><span class="kw">mutate_if</span>(pvals, is.numeric, round, <span class="dv">3</span>)</a>
+<a class="sourceLine" id="cb3-20" data-line-number="20"><span class="co">#&gt;     Hypothesis Variable bs_pvalues_unadjusted bs_pvalues_adjusted</span></a>
+<a class="sourceLine" id="cb3-21" data-line-number="21"><span class="co">#&gt; 1 Hypothesis 1        t                 0.015               0.046</span></a>
+<a class="sourceLine" id="cb3-22" data-line-number="22"><span class="co">#&gt; 2 Hypothesis 2        t                 0.961               0.990</span></a>
+<a class="sourceLine" id="cb3-23" data-line-number="23"><span class="co">#&gt; 3 Hypothesis 3        t                 0.715               0.966</span></a>
+<a class="sourceLine" id="cb3-24" data-line-number="24"><span class="co">#&gt; 4 Hypothesis 4        t                 0.875               0.990</span></a></code></pre></div>
+<!-- Results: -->
+<!-- |Hypothesis    |Variable | bs_pvalues_unadjusted| bs_pvalues_adjusted| -->
+<!-- |:-------------|:--------|---------------------:|-------------------:| -->
+<!-- |Hypothesis 1  |t        |                 0.010|               0.010| -->
+<!-- |Hypothesis 2  |t        |                 0.010|               0.010| -->
+<!-- |Hypothesis 3  |t        |                 0.010|               0.010| -->
+<!-- |Hypothesis 4  |t        |                 0.693|               0.980| -->
+<!-- |Hypothesis 5  |t        |                 0.970|               0.980| -->
+<!-- |Hypothesis 6  |t        |                 0.208|               0.673| -->
+<!-- |Hypothesis 7  |t        |                 0.356|               0.931| -->
+<!-- |Hypothesis 8  |t        |                 0.465|               0.931| -->
+<!-- |Hypothesis 9  |t        |                 0.366|               0.931| -->
+<!-- |Hypothesis 10 |t        |                 0.069|               0.347| -->
+<!-- |Hypothesis 11 |t        |                 0.782|               0.980| -->
+<!-- |Hypothesis 12 |t        |                 0.347|               0.931| -->
+</div>
+</div>
+<div id="references" class="section level2">
+<h2>References</h2>
+<p>Bertz, Frank, Torsten Hothorn, and Peter Westfall. 2011. <em>Multiple Comparisons Using R.</em> Boca Raton: Chapman &amp; Hall/CRC.</p>
+<p>Cameron, Colin, Johah Gelbach, and Douglas Miller. 2008. “Bootstrap-based Improvements For Inference With Clustered Errors”. <em>The Review of Economics and Statistics.</em> 900(3):414-427.</p>
+<p>Casey, Katherine, Rachel Glennerster, and Edward Miguel. 2012. “Reshaping Institutions: Evidence on Aid Impacts Using a Preanalysis Plan”. <em>Quarterly Journal of Economics.</em> 127(4):1755-1812.</p>
+<p>Holm, S. 1979. “A simple sequentially rejective multiple test procedure”. <em>Scandinavian Journal of Statistics.</em> 6(2):65–70.</p>
+<p>Westfall, Peter H., and S. Stanley Young. 1993. <em>Resampling-Based Multiple Testing: Examples and Methods for P-Value Adjustment.</em> New York: John Wiley &amp; Sons.</p>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
