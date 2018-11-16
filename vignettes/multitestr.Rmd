@@ -1,12 +1,16 @@
 --- 
-title: "Free Step-down Adjusted *p*-values" 
+title: "`multitestr`: Resampling-Based Multiple Testing Adjustments for Linear Regression" 
 author: "F. Daniel Hidalgo and Weihuang Wong" 
 date: "`r Sys.Date()`" 
-output: rmarkdown::html_vignette 
+output:
+  rmarkdown::html_vignette:
+    toc: yes
 vignette: >
-  %\VignetteIndexEntry{Free Step-down Adjusted *p*-values} 
-  %\VignetteEngine{knitr::rmarkdown} 
+  %\VignetteIndexEntry{multitestr: Resampling-Based Multiple Testing Adjustments for Linear Regression} 
   %\VignetteEncoding{UTF-8} 
+  %\VignetteEngine{knitr::rmarkdown} 
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include = FALSE}
@@ -18,11 +22,11 @@ knitr::opts_chunk$set(
 
 If multiple hypotheses, $m$, are tested simultaneously, the probability of false positives increases in $m$.  If the test statistics used are independent of one another, the probability of incorrectly rejecting at least one null hypothesis at the $\alpha$ level of significance is $1 - (1 - \alpha)^m$.
 
-In this package, we implement the Westfall and Young procedure to control the *familywise error rate* (FWER) for a family of hypotheses.  In this vignette, we describe the concept of a FWER.  We then introduce the Westfall and Young resampling-based step down procedure for adjusting *p*-values to control the FWER.  We use Monte Carlo simulation to demonstrate how the FWER differs when different methods are used to adjust *p*-values.  Finally, we reproduce results from an empirical study to illustrate how the `boot_stepdown` function can used to generate adjusted *p*-values.
+In this package, we implement the Westfall and Young procedure to control the *familywise error rate* (FWER) for a family of hypotheses.  In this vignette, we describe the concept of a [FWER](#fwer) and discuss the [Westfall and Young resampling-based step down procedure](#stepdown) for adjusting *p*-values to control the FWER.  We use [Monte Carlo simulations](#sim) to demonstrate how the FWER differs when different methods are used to adjust *p*-values. We next reproduce results from an [empirical study](#caseyetal) to illustrate how the `boot_stepdown` function can used to generate adjusted *p*-values. Finally, we reproduce simulations from a Stata implementation of the Westfall and Young method and show that the results are virtually identical.
 
 For a thorough discussion of error rates, we refer readers to Bertz, Hothorn, and Westfall (2011, Chapter 2).  The exposition in this vignette draws on that chapter.
 
-## Controlling the familywise error rate
+## Controlling the familywise error rate {#fwer}
 
 Let $V$ be a random variable representing the number of Type I errors or false positives, i.e. the number of hypotheses from a total of $m$ hypotheses that are rejected but are in fact true.  The familywise error rate (FWER) is defined as
 
@@ -52,7 +56,7 @@ Westfall and Young (1993) show that under some assumptions, in particular the *s
 
 Suppose we ran an experiment and measured 6 different outcomes for each subject, $\mathbf{Y}_i^\top = (Y_{i1}, Y_{i2}, \dots Y_{i6})$, $i = 1, \dots, n$. Let the effect of treatment on outcome $j$ be $\beta_j$, so that our hypotheses of interest are $H_j: \beta_j = 0$ for $j = 1, \dots, 6$ and $T_j$ are the corresponding test statistics.  Suppose hypotheses 3, 5, and 6 are true.  The subset pivotality condition holds if  $f(T_3, T_5, T_6)$ is the same, regardless of whether all six hypotheses are true, or only hypotheses 3, 5, and 6 are true.  Subset pivotality is satisfied in the common situation where one examines the effect of one treatment on many outcomes.  For more details, see Westfall and Young (1993, pp. 42ff), from which this discussion draws.
 
-## Resampling-based step down procedure
+## Resampling-based step down procedure {#stepdown}
 
 With subset pivotality, one can obtain strong control with the following resampling (i.e. permutation inference or the bootstrap) procedure:
 
@@ -93,11 +97,11 @@ The procedure is completed by enforcing monotonicity using successive maximizati
 
 > **Example (continued).** Enforcing monotonicity ensures that $\tilde{p}^\ast_2 \leq \tilde{p}^\ast_4 \leq \tilde{p}^\ast_3 \leq \tilde{p}^\ast_1$.
 
-## Resampling Methods
+### Resampling Methods
 
 Current, we have implemented two bootstrap methods in `multitestr`: the "pairs" non-parametric bootstrap and the "wild" parametric bootstrap. The "pairs" bootstrap resamples either units or clusters (in the case of clustered errors) to generate boostrap samples. The wild bootstrap resamples from residuals as in the traditional parametric bootstrap, but unlike the traditional parametric bootstrap, allows for heteroskedasticity.  In our implementation, we transform the residuals using the *Rademacher* distribution, as suggested by Cameron, Gelbach, and Miller (2008).
 
-## Simulation
+## Simulation {#sim}
 
 We present a simulation study to compare unadjusted and adjusted *p*-values from multiple hypothesis testing.  There are 300 units in each sample.  We observe 5 outcomes for each unit, drawn from a multivariate normal distribution with mean 0, variance 1, and a correlation between outcomes of 0.8.  Treatment is randomly assigned to half of the units and has no effect on any outcome (so all the null hypotheses are true). There is one covariate drawn from a normal distribution with mean 0 and variance 1.
 
@@ -105,22 +109,29 @@ For each sample, we estimate the effect of treatment on each of the 5 outcomes u
 
 ```{r simulate, cache = TRUE}
 library("multitestr")
+library("parallel")
+library("foreach")
+
 # Set a seed
 set.seed(343)
+
+##Parallelize Simulations
+cl <- parallel::makeCluster(parallel::detectCores() - 1)
+doParallel::registerDoParallel(cl)
 
 # Generate correlated outcomes
 # Outcomes are unrelated to treatment
 # All null hypotheses are true
-nsims <- 500
+nsims <- 1000
 n <- 300
 k <- 5
 r <- .8
 s <- 1
 
-out <- sapply(1:nsims, function(i) {
+sim_function <- function(){
   sigma <- matrix(s * r, k, k)
   diag(sigma) <- s
-  outcomes <- mvtnorm::rmvnorm(n, mean = rep(0, k), sigma = sigma)
+  outcomes <- MASS::mvrnorm(n, mu =  rep(0, k), Sigma = sigma)
   covar <- rnorm(n = n)
 
   # Complete Random Assignment
@@ -147,19 +158,21 @@ out <- sapply(1:nsims, function(i) {
                               parallel = FALSE, pb = FALSE,
                               boot_type = "pairs")$bs_pvalues_adjusted
 
-  c(nominal = any(nom_pvalues <= .05),
+  data.frame(nominal = any(nom_pvalues <= .05),
     holm = any(p.adjust(nom_pvalues, method = "holm") <= .05),
     boot = any(boot_pvals <= .05))
+}
 
-})
+out <- foreach(i=1:nsims, .packages = c("multitestr", "lmtest", "sandwich")) %dopar%
+  sim_function()
 
-apply(out, MAR = 1, mean)
+apply(dplyr::bind_rows(out), MAR = 2, mean)
 ```
 
 We compare the FWER across three types of *p*-values: unadjusted (`nominal`) *p*-values, *p*-values adjusted using the Holm (1979) method (`holm`), and *p*-values adjusted using the Westfall and Young (1993) resampling-based (bootstrapped) step down procedure presented above (`boot`). The FWER using nominal *p*-values exceeds 0.05.  Both the Holm and the bootstrapped step-down methods produce Type I errors in 0.05 or less of all samples (i.e. they successfully control the FWER at $\alpha = 0.05$), but the Holm method is more conservative and hence less powerful.
 
 
-## Application
+## Application {#caseyetal}
 
 ### Multiple Outcomes
 
@@ -228,6 +241,101 @@ dplyr::mutate_if(pvals, is.numeric, round, 3)
 <!-- |Hypothesis 11 |t        |                 0.782|               0.980| -->
 <!-- |Hypothesis 12 |t        |                 0.347|               0.931| -->
 
+## Comparison to Stata package `wyoung`
+
+Jones et al (2018) have developed a Stata implementation of the Westfall and Young bootstrap method called [`wyoung`](https://ideas.repec.org/c/boc/bocode/s458440.html). In their [documentation](https://www.nber.org/workplacewellness/s/wyoung.pdf), Jones et al report simulations on the performance the method under a variety of scenarios. We replicate two of their simulations and show that results our results are close (within simulation error) to what they report. 
+
+In columns 1 and 3 of Table 1 in their [documentation](https://www.nber.org/workplacewellness/s/wyoung.pdf), Jones et al (2018) report results from a simulation with two different data generating processes: one with normal errors and one with correlated errors. The basic setup is as follows:  let $\mu$ be a 10 dimensional vector of zeros $(0,0,\ldots,0)'$, $I$ is a 10 x 10 identity matrix, and $\Sigma$ is a 10 x 10 covariance matrix where all the off diagonal entries are equal to 0.9.
+
+The data generating process for the two  simulations are: 
+
+1. Normal i.i.d. errors (10 outcomes) and null hypothesis is true
+- $\epsilon \sim N(\mu, I)$
+- $Y = \epsilon$
+- $X \sim N(0,1)$
+2. Correlated Outcomes (10 outcomes) and null hypothesis is false
+- $X \sim N(\mu,I)$
+- $\epsilon \sim N(\mu, \Sigma)$
+- $Y = 0.2X + \epsilon$s
+
+As in Jones et al (2018), we draw 2000 samples and in each of the simulations, we esitmate 10 regressions:
+$Y_i = \alpha + \beta_i X_i + \epsilon_i, i=1\ldots 10$. To compare multiple testing methods, we compute the empirical FWER for each type of data generating process and ajustment method. 
+
+```{r jones_sim1, cache=TRUE, include=FALSE}
+##Parallelize Simulations
+cl <- parallel::makeCluster(parallel::detectCores() - 1)
+doParallel::registerDoParallel(cl)
+
+mu <- rep(0, 10)
+sigma <- matrix(0.9, nrow=10, ncol=10)
+diag(sigma) <- 1
+
+##Function to generate 1 dataset
+gen_dataset <- function(n = 100){
+  x <- data.frame(matrix(rep(rnorm(n), 10), ncol=10))
+  e_norm <- data.frame(matrix(rnorm(n * 10), ncol = 10))
+  e_cor <- data.frame(MASS::mvrnorm(n = n, mu = mu, Sigma = sigma))
+  y_norm <- data.frame(e_norm)
+  y_cor <- data.frame(.2 * x + e_cor)
+  names(y_norm) <- paste0("y_norm", 1:10)
+  names(y_cor) <- paste0("y_cor", 1:10)
+  names(x) <- paste0("x", 1:10)
+  cbind(y_cor,y_norm, x)
+}
+
+##Function to perform 1 simulation
+gen_sim <- function(n = 100){
+  sim_data <- gen_dataset(n = n)
+  #Unadjusted p-values
+  lm_pvals_norm <- sapply(1:10, 
+         function(x){summary(lm(sim_data[[paste0("y_norm",x)]] ~ sim_data[[paste0("x",x)]]))$coefficients[2,4]})
+  lm_pvals_cor <- sapply(1:10, 
+         function(x){summary(lm(sim_data[[paste0("y_cor",x)]] ~ sim_data[[paste0("x",x)]]))$coefficients[2,4]})
+  #Adjusted p-values
+  wy_pvals_norm <- boot_stepdown(full_formulas = lapply(sprintf("y_norm%d ~ x%d", 1:10, 1:10), as.formula),
+                         null_formulas = lapply(sprintf("y_norm%d ~ 1", 1:10, 1:10), as.formula),
+                         data = sim_data,
+                         coef_list = paste0("x", 1:10),
+                         nboots = 1000, 
+                         parallel = FALSE, 
+                         boot_type = "pairs",
+                         pb = FALSE)
+  wy_pvals_cor <- boot_stepdown(full_formulas = lapply(sprintf("y_cor%d ~ x%d", 1:10, 1:10), as.formula),
+                         null_formulas = lapply(sprintf("y_cor%d ~ 1", 1:10, 1:10), as.formula),
+                         data = sim_data,
+                         coef_list = paste0("x", 1:10),
+                         nboots = 1000, 
+                         parallel = FALSE, 
+                         boot_type = "pairs",
+                         pb = FALSE)
+  dplyr::tibble(lm_rejected_norm = any(lm_pvals_norm <= .05),
+         wy_rejected_norm = any(wy_pvals_norm$bs_pvalues_adjusted <= .05),
+         lm_rejected_cor = any(lm_pvals_cor <= .05),
+         wy_rejected_cor = any(wy_pvals_cor$bs_pvalues_adjusted <= .05))
+}
+
+
+sim_results <-  foreach (i=1:2000, .packages = c( "multitestr", "dplyr"))  %dopar% 
+  gen_sim() 
+jones_sim1 <- apply(dplyr::bind_rows(sim_results), 2, mean)
+```
+
+```{r jones_results, echo=FALSE, message=FALSE, warning=FALSE}
+library("huxtable")
+library("dplyr")
+hux(Simulation = c("Normal Errors, Null Hypo. True", "", "Correlated Errors, Null Hypo. False", ""),
+       "Adjustment Method" = c("Unadjusted", "Westfall-Young", "Unadjusted", "Westfall-Young"), 
+       "Simulation FWER" = jones_sim1, 
+       "Jones et al Simulation FWER" = c(.398, .041, 0.685, 0.513), 
+    add_colnames = TRUE) %>%
+  merge_cells(2:3, 1) %>%
+  merge_cells(4:5, 1) %>%
+  set_caption("Simulation Results Comparing multitestr and wyoung") %>%
+  theme_plain()
+```
+
+The results reported in the above Table shows that the `multitestr` implemention produces results close to the results reported in Jones et al. 
+
 ## References
 
 Bertz, Frank, Torsten Hothorn, and Peter Westfall. 2011. *Multiple Comparisons Using R.* Boca Raton: Chapman & Hall/CRC.
@@ -237,5 +345,7 @@ Cameron, Colin, Johah Gelbach, and Douglas Miller. 2008. "Bootstrap-based Improv
 Casey, Katherine, Rachel Glennerster, and Edward Miguel. 2012. "Reshaping Institutions: Evidence on Aid Impacts Using a Preanalysis Plan". *Quarterly Journal of Economics.* 127(4):1755-1812.
 
 Holm, S. 1979. "A simple sequentially rejective multiple test procedure". *Scandinavian Journal of Statistics.* 6(2):65–70. 
+
+Jones, D., D. Molitor, and J. Reif. 2018. "What Do Workplace Wellness Programs Do? Evidence from the Illinois Workplace Wellness Study." *National Bureau of Economic Research Working Paper No. 24229*.
 
 Westfall, Peter H., and S. Stanley Young. 1993. *Resampling-Based Multiple Testing: Examples and Methods for P-Value Adjustment.* New York: John Wiley & Sons.

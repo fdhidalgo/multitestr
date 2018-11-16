@@ -1,12 +1,12 @@
 Package: multitestr
 Type: Package
-Title: Multiple Comparison Adjustments for Hypothesis Testing
+Title: Resampling-Based Multiple Testing Adjustments for Linear Regression
 Version: 0.1.1.9000
 Date: 2017-10-17
 Authors@R: as.person(c(
     "F. Daniel Hidalgo <dhidalgo@mit.edu> [aut, cre]"))
 Description: An implementation of Westfall and Young's (1993) free step-down
-    method to adjust p-values in resampling-based multiple testing.
+    method to adjust p-values for multiple testing.
 License: GPL-2
 LazyData: TRUE
 Imports: 
@@ -17,9 +17,10 @@ Imports:
   stats,
   utils
 Suggests: 
+    doParallel,
+    huxtable,
     knitr,
     lfe,
-    mvtnorm,
     parallel,
     rmarkdown,
     spelling
