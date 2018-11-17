@@ -5,11 +5,12 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Free Step-down Adjusted <em>p</em>-values • multitestr</title>
+<title>
+<code>multitestr</code>: Resampling-Based Multiple Testing Adjustments for Linear Regression • multitestr</title>
 <!-- jquery --><script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script><!-- Bootstrap --><link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script><!-- Font Awesome icons --><link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.7.1/clipboard.min.js" integrity="sha384-cV+rhyOuRHc9Ub/91rihWcGmMmCXDeksTtCihMupQHSsi8GIIRDG0ThDc3HGQFJ3" crossorigin="anonymous"></script><!-- sticky kit --><script src="https://cdnjs.cloudflare.com/ajax/libs/sticky-kit/1.1.3/sticky-kit.min.js" integrity="sha256-c4Rlo1ZozqTPE2RLuvbusY3+SU1pQaJC0TjuhygMipw=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
-<script src="../pkgdown.js"></script><meta property="og:title" content="Free Step-down Adjusted &lt;em&gt;p&lt;/em&gt;-values">
+<script src="../pkgdown.js"></script><meta property="og:title" content="&lt;code&gt;multitestr&lt;/code&gt;: Resampling-Based Multiple Testing Adjustments for Linear Regression">
 <meta property="og:description" content="">
 <meta name="twitter:card" content="summary">
 <!-- mathjax --><script src="https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!--[if lt IE 9]>
@@ -60,10 +61,11 @@
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
-      <h1>Free Step-down Adjusted <em>p</em>-values</h1>
+      <h1>
+<code>multitestr</code>: Resampling-Based Multiple Testing Adjustments for Linear Regression</h1>
                         <h4 class="author">F. Daniel Hidalgo and Weihuang Wong</h4>
             
-            <h4 class="date">2018-10-09</h4>
+            <h4 class="date">2018-11-16</h4>
       
       
       <div class="hidden name"><code>multitestr.Rmd</code></div>
@@ -73,11 +75,11 @@
     
     
 <p>If multiple hypotheses, <span class="math inline">\(m\)</span>, are tested simultaneously, the probability of false positives increases in <span class="math inline">\(m\)</span>. If the test statistics used are independent of one another, the probability of incorrectly rejecting at least one null hypothesis at the <span class="math inline">\(\alpha\)</span> level of significance is <span class="math inline">\(1 - (1 - \alpha)^m\)</span>.</p>
-<p>In this package, we implement the Westfall and Young procedure to control the <em>familywise error rate</em> (FWER) for a family of hypotheses. In this vignette, we describe the concept of a FWER. We then introduce the Westfall and Young resampling-based step down procedure for adjusting <em>p</em>-values to control the FWER. We use Monte Carlo simulation to demonstrate how the FWER differs when different methods are used to adjust <em>p</em>-values. Finally, we reproduce results from an empirical study to illustrate how the <code>boot_stepdown</code> function can used to generate adjusted <em>p</em>-values.</p>
+<p>In this package, we implement the Westfall and Young procedure to control the <em>familywise error rate</em> (FWER) for a family of hypotheses. In this vignette, we describe the concept of a <a href="#fwer">FWER</a> and discuss the <a href="#stepdown">Westfall and Young resampling-based step down procedure</a> for adjusting <em>p</em>-values to control the FWER. We use <a href="#sim">Monte Carlo simulations</a> to demonstrate how the FWER differs when different methods are used to adjust <em>p</em>-values. We next reproduce results from an <a href="#caseyetal">empirical study</a> to illustrate how the <code>boot_stepdown</code> function can used to generate adjusted <em>p</em>-values. Finally, we reproduce simulations from a Stata implementation of the Westfall and Young method and show that the results are virtually identical.</p>
 <p>For a thorough discussion of error rates, we refer readers to Bertz, Hothorn, and Westfall (2011, Chapter 2). The exposition in this vignette draws on that chapter.</p>
-<div id="controlling-the-familywise-error-rate" class="section level2">
+<div id="fwer" class="section level2">
 <h2 class="hasAnchor">
-<a href="#controlling-the-familywise-error-rate" class="anchor"></a>Controlling the familywise error rate</h2>
+<a href="#fwer" class="anchor"></a>Controlling the familywise error rate</h2>
 <p>Let <span class="math inline">\(V\)</span> be a random variable representing the number of Type I errors or false positives, i.e. the number of hypotheses from a total of <span class="math inline">\(m\)</span> hypotheses that are rejected but are in fact true. The familywise error rate (FWER) is defined as</p>
 <p><span class="math display">\[
 \textrm{FWER} = \Pr(V &gt; 0),
@@ -99,9 +101,9 @@ H = \bigcap_{i \in M_0} H_i, \quad M_0 = M.
 <p>Suppose we ran an experiment and measured 6 different outcomes for each subject, <span class="math inline">\(\mathbf{Y}_i^\top = (Y_{i1}, Y_{i2}, \dots Y_{i6})\)</span>, <span class="math inline">\(i = 1, \dots, n\)</span>. Let the effect of treatment on outcome <span class="math inline">\(j\)</span> be <span class="math inline">\(\beta_j\)</span>, so that our hypotheses of interest are <span class="math inline">\(H_j: \beta_j = 0\)</span> for <span class="math inline">\(j = 1, \dots, 6\)</span> and <span class="math inline">\(T_j\)</span> are the corresponding test statistics. Suppose hypotheses 3, 5, and 6 are true. The subset pivotality condition holds if <span class="math inline">\(f(T_3, T_5, T_6)\)</span> is the same, regardless of whether all six hypotheses are true, or only hypotheses 3, 5, and 6 are true. Subset pivotality is satisfied in the common situation where one examines the effect of one treatment on many outcomes. For more details, see Westfall and Young (1993, pp. 42ff), from which this discussion draws.</p>
 </div>
 </div>
-<div id="resampling-based-step-down-procedure" class="section level2">
+<div id="stepdown" class="section level2">
 <h2 class="hasAnchor">
-<a href="#resampling-based-step-down-procedure" class="anchor"></a>Resampling-based step down procedure</h2>
+<a href="#stepdown" class="anchor"></a>Resampling-based step down procedure</h2>
 <p>With subset pivotality, one can obtain strong control with the following resampling (i.e. permutation inference or the bootstrap) procedure:</p>
 <p>In all steps below, take the absolute value of the t-statistic. For the original data, compute the naive t-statistics <span class="math inline">\(t^\ast_1, \dots, t^\ast_m\)</span> and then order the raw t-values such that <span class="math inline">\(t^\ast_{r_1} \geq t^\ast_{r_2} \geq \dots \geq t^\ast_{r_m}\)</span>. For the <em>b</em>th bootstrap iteration, <span class="math inline">\(b = 1, \dots, B\)</span>:</p>
 <ol style="list-style-type: decimal">
@@ -136,74 +138,83 @@ H = \bigcap_{i \in M_0} H_i, \quad M_0 = M.
 <blockquote>
 <p><strong>Example (continued).</strong> Enforcing monotonicity ensures that <span class="math inline">\(\tilde{p}^\ast_2 \leq \tilde{p}^\ast_4 \leq \tilde{p}^\ast_3 \leq \tilde{p}^\ast_1\)</span>.</p>
 </blockquote>
-</div>
-<div id="resampling-methods" class="section level2">
-<h2 class="hasAnchor">
-<a href="#resampling-methods" class="anchor"></a>Resampling Methods</h2>
+<div id="resampling-methods" class="section level3">
+<h3 class="hasAnchor">
+<a href="#resampling-methods" class="anchor"></a>Resampling Methods</h3>
 <p>Current, we have implemented two bootstrap methods in <code>multitestr</code>: the “pairs” non-parametric bootstrap and the “wild” parametric bootstrap. The “pairs” bootstrap resamples either units or clusters (in the case of clustered errors) to generate boostrap samples. The wild bootstrap resamples from residuals as in the traditional parametric bootstrap, but unlike the traditional parametric bootstrap, allows for heteroskedasticity. In our implementation, we transform the residuals using the <em>Rademacher</em> distribution, as suggested by Cameron, Gelbach, and Miller (2008).</p>
 </div>
-<div id="simulation" class="section level2">
+</div>
+<div id="sim" class="section level2">
 <h2 class="hasAnchor">
-<a href="#simulation" class="anchor"></a>Simulation</h2>
+<a href="#sim" class="anchor"></a>Simulation</h2>
 <p>We present a simulation study to compare unadjusted and adjusted <em>p</em>-values from multiple hypothesis testing. There are 300 units in each sample. We observe 5 outcomes for each unit, drawn from a multivariate normal distribution with mean 0, variance 1, and a correlation between outcomes of 0.8. Treatment is randomly assigned to half of the units and has no effect on any outcome (so all the null hypotheses are true). There is one covariate drawn from a normal distribution with mean 0 and variance 1.</p>
 <p>For each sample, we estimate the effect of treatment on each of the 5 outcomes using OLS. We reject a null hypothesis if its <em>p</em>-value is lower than or equal to 0.05. In the experiment presented below, we draw 500 samples, and compute the FWER, i.e. the proportion of samples in which at least one null hypothesis was (falsely) rejected.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw">library</span>(<span class="st">"multitestr"</span>)</a>
-<a class="sourceLine" id="cb1-2" data-line-number="2"><span class="co"># Set a seed</span></a>
-<a class="sourceLine" id="cb1-3" data-line-number="3"><span class="kw">set.seed</span>(<span class="dv">343</span>)</a>
+<a class="sourceLine" id="cb1-2" data-line-number="2"><span class="kw">library</span>(<span class="st">"parallel"</span>)</a>
+<a class="sourceLine" id="cb1-3" data-line-number="3"><span class="kw">library</span>(<span class="st">"foreach"</span>)</a>
 <a class="sourceLine" id="cb1-4" data-line-number="4"></a>
-<a class="sourceLine" id="cb1-5" data-line-number="5"><span class="co"># Generate correlated outcomes</span></a>
-<a class="sourceLine" id="cb1-6" data-line-number="6"><span class="co"># Outcomes are unrelated to treatment</span></a>
-<a class="sourceLine" id="cb1-7" data-line-number="7"><span class="co"># All null hypotheses are true</span></a>
-<a class="sourceLine" id="cb1-8" data-line-number="8">nsims &lt;-<span class="st"> </span><span class="dv">500</span></a>
-<a class="sourceLine" id="cb1-9" data-line-number="9">n &lt;-<span class="st"> </span><span class="dv">300</span></a>
-<a class="sourceLine" id="cb1-10" data-line-number="10">k &lt;-<span class="st"> </span><span class="dv">5</span></a>
-<a class="sourceLine" id="cb1-11" data-line-number="11">r &lt;-<span class="st"> </span><span class="fl">.8</span></a>
-<a class="sourceLine" id="cb1-12" data-line-number="12">s &lt;-<span class="st"> </span><span class="dv">1</span></a>
-<a class="sourceLine" id="cb1-13" data-line-number="13"></a>
-<a class="sourceLine" id="cb1-14" data-line-number="14">out &lt;-<span class="st"> </span><span class="kw">sapply</span>(<span class="dv">1</span><span class="op">:</span>nsims, <span class="cf">function</span>(i) {</a>
-<a class="sourceLine" id="cb1-15" data-line-number="15">  sigma &lt;-<span class="st"> </span><span class="kw">matrix</span>(s <span class="op">*</span><span class="st"> </span>r, k, k)</a>
-<a class="sourceLine" id="cb1-16" data-line-number="16">  <span class="kw">diag</span>(sigma) &lt;-<span class="st"> </span>s</a>
-<a class="sourceLine" id="cb1-17" data-line-number="17">  outcomes &lt;-<span class="st"> </span>mvtnorm<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/mvtnorm/topics/Mvnorm">rmvnorm</a></span>(n, <span class="dt">mean =</span> <span class="kw">rep</span>(<span class="dv">0</span>, k), <span class="dt">sigma =</span> sigma)</a>
-<a class="sourceLine" id="cb1-18" data-line-number="18">  covar &lt;-<span class="st"> </span><span class="kw">rnorm</span>(<span class="dt">n =</span> n)</a>
-<a class="sourceLine" id="cb1-19" data-line-number="19"></a>
-<a class="sourceLine" id="cb1-20" data-line-number="20">  <span class="co"># Complete Random Assignment</span></a>
-<a class="sourceLine" id="cb1-21" data-line-number="21">  treatment &lt;-<span class="st"> </span><span class="kw">sample</span>(<span class="kw">rep</span>(<span class="dv">0</span><span class="op">:</span><span class="dv">1</span>, <span class="dt">each =</span> n<span class="op">/</span><span class="dv">2</span>), n)</a>
-<a class="sourceLine" id="cb1-22" data-line-number="22"></a>
-<a class="sourceLine" id="cb1-23" data-line-number="23">  nom_pvalues &lt;-<span class="st"> </span><span class="kw">apply</span>(outcomes, <span class="dv">2</span>, <span class="cf">function</span>(Y) {</a>
-<a class="sourceLine" id="cb1-24" data-line-number="24">    fit &lt;-<span class="st"> </span><span class="kw">lm</span>(Y <span class="op">~</span><span class="st"> </span>treatment <span class="op">+</span><span class="st"> </span>covar)</a>
-<a class="sourceLine" id="cb1-25" data-line-number="25">    lmtest<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/lmtest/topics/coeftest">coeftest</a></span>(fit, sandwich<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/sandwich/topics/vcovCL">vcovCL</a></span>(fit))[<span class="dv">2</span>, <span class="dv">4</span>]</a>
-<a class="sourceLine" id="cb1-26" data-line-number="26">  })</a>
-<a class="sourceLine" id="cb1-27" data-line-number="27"></a>
-<a class="sourceLine" id="cb1-28" data-line-number="28">  boot_pvals &lt;-<span class="st"> </span><span class="kw"><a href="../reference/boot_stepdown.html">boot_stepdown</a></span>(<span class="dt">null_formulas =</span> <span class="kw">c</span>(X1 <span class="op">~</span><span class="st"> </span>covar,</a>
-<a class="sourceLine" id="cb1-29" data-line-number="29">                                                X2 <span class="op">~</span><span class="st"> </span>covar,</a>
-<a class="sourceLine" id="cb1-30" data-line-number="30">                                                X3 <span class="op">~</span><span class="st"> </span>covar,</a>
-<a class="sourceLine" id="cb1-31" data-line-number="31">                                                X4 <span class="op">~</span><span class="st"> </span>covar,</a>
-<a class="sourceLine" id="cb1-32" data-line-number="32">                                                X5 <span class="op">~</span><span class="st"> </span>covar),</a>
-<a class="sourceLine" id="cb1-33" data-line-number="33">                              <span class="dt">full_formulas =</span> <span class="kw">c</span>(X1 <span class="op">~</span><span class="st"> </span>treatment <span class="op">+</span><span class="st"> </span>covar,</a>
-<a class="sourceLine" id="cb1-34" data-line-number="34">                                                X2 <span class="op">~</span><span class="st"> </span>treatment <span class="op">+</span><span class="st"> </span>covar,</a>
-<a class="sourceLine" id="cb1-35" data-line-number="35">                                                X3 <span class="op">~</span><span class="st"> </span>treatment <span class="op">+</span><span class="st"> </span>covar,</a>
-<a class="sourceLine" id="cb1-36" data-line-number="36">                                                X4 <span class="op">~</span><span class="st"> </span>treatment <span class="op">+</span><span class="st"> </span>covar,</a>
-<a class="sourceLine" id="cb1-37" data-line-number="37">                                                X5 <span class="op">~</span><span class="st"> </span>treatment <span class="op">+</span><span class="st"> </span>covar),</a>
-<a class="sourceLine" id="cb1-38" data-line-number="38">                              <span class="dt">data =</span> <span class="kw">data.frame</span>(treatment, outcomes, covar),</a>
-<a class="sourceLine" id="cb1-39" data-line-number="39">                              <span class="dt">coef_list =</span> <span class="kw">rep</span>(<span class="st">"treatment"</span>, k),</a>
-<a class="sourceLine" id="cb1-40" data-line-number="40">                              <span class="dt">nboots =</span> <span class="dv">200</span>,</a>
-<a class="sourceLine" id="cb1-41" data-line-number="41">                              <span class="dt">parallel =</span> <span class="ot">FALSE</span>, <span class="dt">pb =</span> <span class="ot">FALSE</span>,</a>
-<a class="sourceLine" id="cb1-42" data-line-number="42">                              <span class="dt">boot_type =</span> <span class="st">"pairs"</span>)<span class="op">$</span>bs_pvalues_adjusted</a>
-<a class="sourceLine" id="cb1-43" data-line-number="43"></a>
-<a class="sourceLine" id="cb1-44" data-line-number="44">  <span class="kw">c</span>(<span class="dt">nominal =</span> <span class="kw">any</span>(nom_pvalues <span class="op">&lt;=</span><span class="st"> </span><span class="fl">.05</span>),</a>
-<a class="sourceLine" id="cb1-45" data-line-number="45">    <span class="dt">holm =</span> <span class="kw">any</span>(<span class="kw">p.adjust</span>(nom_pvalues, <span class="dt">method =</span> <span class="st">"holm"</span>) <span class="op">&lt;=</span><span class="st"> </span><span class="fl">.05</span>),</a>
-<a class="sourceLine" id="cb1-46" data-line-number="46">    <span class="dt">boot =</span> <span class="kw">any</span>(boot_pvals <span class="op">&lt;=</span><span class="st"> </span><span class="fl">.05</span>))</a>
-<a class="sourceLine" id="cb1-47" data-line-number="47"></a>
-<a class="sourceLine" id="cb1-48" data-line-number="48">})</a>
-<a class="sourceLine" id="cb1-49" data-line-number="49"></a>
-<a class="sourceLine" id="cb1-50" data-line-number="50"><span class="kw">apply</span>(out, <span class="dt">MAR =</span> <span class="dv">1</span>, mean)</a>
-<a class="sourceLine" id="cb1-51" data-line-number="51"><span class="co">#&gt; nominal    holm    boot </span></a>
-<a class="sourceLine" id="cb1-52" data-line-number="52"><span class="co">#&gt;   0.150   0.032   0.050</span></a></code></pre></div>
+<a class="sourceLine" id="cb1-5" data-line-number="5"><span class="co"># Set a seed</span></a>
+<a class="sourceLine" id="cb1-6" data-line-number="6"><span class="kw">set.seed</span>(<span class="dv">343</span>)</a>
+<a class="sourceLine" id="cb1-7" data-line-number="7"></a>
+<a class="sourceLine" id="cb1-8" data-line-number="8"><span class="co">##Parallelize Simulations</span></a>
+<a class="sourceLine" id="cb1-9" data-line-number="9">cl &lt;-<span class="st"> </span>parallel<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/parallel/topics/makeCluster">makeCluster</a></span>(parallel<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/parallel/topics/detectCores">detectCores</a></span>() <span class="op">-</span><span class="st"> </span><span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb1-10" data-line-number="10">doParallel<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/doParallel/topics/registerDoParallel">registerDoParallel</a></span>(cl)</a>
+<a class="sourceLine" id="cb1-11" data-line-number="11"></a>
+<a class="sourceLine" id="cb1-12" data-line-number="12"><span class="co"># Generate correlated outcomes</span></a>
+<a class="sourceLine" id="cb1-13" data-line-number="13"><span class="co"># Outcomes are unrelated to treatment</span></a>
+<a class="sourceLine" id="cb1-14" data-line-number="14"><span class="co"># All null hypotheses are true</span></a>
+<a class="sourceLine" id="cb1-15" data-line-number="15">nsims &lt;-<span class="st"> </span><span class="dv">1000</span></a>
+<a class="sourceLine" id="cb1-16" data-line-number="16">n &lt;-<span class="st"> </span><span class="dv">300</span></a>
+<a class="sourceLine" id="cb1-17" data-line-number="17">k &lt;-<span class="st"> </span><span class="dv">5</span></a>
+<a class="sourceLine" id="cb1-18" data-line-number="18">r &lt;-<span class="st"> </span><span class="fl">.8</span></a>
+<a class="sourceLine" id="cb1-19" data-line-number="19">s &lt;-<span class="st"> </span><span class="dv">1</span></a>
+<a class="sourceLine" id="cb1-20" data-line-number="20"></a>
+<a class="sourceLine" id="cb1-21" data-line-number="21">sim_function &lt;-<span class="st"> </span><span class="cf">function</span>(){</a>
+<a class="sourceLine" id="cb1-22" data-line-number="22">  sigma &lt;-<span class="st"> </span><span class="kw">matrix</span>(s <span class="op">*</span><span class="st"> </span>r, k, k)</a>
+<a class="sourceLine" id="cb1-23" data-line-number="23">  <span class="kw">diag</span>(sigma) &lt;-<span class="st"> </span>s</a>
+<a class="sourceLine" id="cb1-24" data-line-number="24">  outcomes &lt;-<span class="st"> </span>MASS<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/MASS/topics/mvrnorm">mvrnorm</a></span>(n, <span class="dt">mu =</span>  <span class="kw">rep</span>(<span class="dv">0</span>, k), <span class="dt">Sigma =</span> sigma)</a>
+<a class="sourceLine" id="cb1-25" data-line-number="25">  covar &lt;-<span class="st"> </span><span class="kw">rnorm</span>(<span class="dt">n =</span> n)</a>
+<a class="sourceLine" id="cb1-26" data-line-number="26"></a>
+<a class="sourceLine" id="cb1-27" data-line-number="27">  <span class="co"># Complete Random Assignment</span></a>
+<a class="sourceLine" id="cb1-28" data-line-number="28">  treatment &lt;-<span class="st"> </span><span class="kw">sample</span>(<span class="kw">rep</span>(<span class="dv">0</span><span class="op">:</span><span class="dv">1</span>, <span class="dt">each =</span> n<span class="op">/</span><span class="dv">2</span>), n)</a>
+<a class="sourceLine" id="cb1-29" data-line-number="29"></a>
+<a class="sourceLine" id="cb1-30" data-line-number="30">  nom_pvalues &lt;-<span class="st"> </span><span class="kw">apply</span>(outcomes, <span class="dv">2</span>, <span class="cf">function</span>(Y) {</a>
+<a class="sourceLine" id="cb1-31" data-line-number="31">    fit &lt;-<span class="st"> </span><span class="kw">lm</span>(Y <span class="op">~</span><span class="st"> </span>treatment <span class="op">+</span><span class="st"> </span>covar)</a>
+<a class="sourceLine" id="cb1-32" data-line-number="32">    lmtest<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/lmtest/topics/coeftest">coeftest</a></span>(fit, sandwich<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/sandwich/topics/vcovCL">vcovCL</a></span>(fit))[<span class="dv">2</span>, <span class="dv">4</span>]</a>
+<a class="sourceLine" id="cb1-33" data-line-number="33">  })</a>
+<a class="sourceLine" id="cb1-34" data-line-number="34"></a>
+<a class="sourceLine" id="cb1-35" data-line-number="35">  boot_pvals &lt;-<span class="st"> </span><span class="kw"><a href="../reference/boot_stepdown.html">boot_stepdown</a></span>(<span class="dt">null_formulas =</span> <span class="kw">c</span>(X1 <span class="op">~</span><span class="st"> </span>covar,</a>
+<a class="sourceLine" id="cb1-36" data-line-number="36">                                                X2 <span class="op">~</span><span class="st"> </span>covar,</a>
+<a class="sourceLine" id="cb1-37" data-line-number="37">                                                X3 <span class="op">~</span><span class="st"> </span>covar,</a>
+<a class="sourceLine" id="cb1-38" data-line-number="38">                                                X4 <span class="op">~</span><span class="st"> </span>covar,</a>
+<a class="sourceLine" id="cb1-39" data-line-number="39">                                                X5 <span class="op">~</span><span class="st"> </span>covar),</a>
+<a class="sourceLine" id="cb1-40" data-line-number="40">                              <span class="dt">full_formulas =</span> <span class="kw">c</span>(X1 <span class="op">~</span><span class="st"> </span>treatment <span class="op">+</span><span class="st"> </span>covar,</a>
+<a class="sourceLine" id="cb1-41" data-line-number="41">                                                X2 <span class="op">~</span><span class="st"> </span>treatment <span class="op">+</span><span class="st"> </span>covar,</a>
+<a class="sourceLine" id="cb1-42" data-line-number="42">                                                X3 <span class="op">~</span><span class="st"> </span>treatment <span class="op">+</span><span class="st"> </span>covar,</a>
+<a class="sourceLine" id="cb1-43" data-line-number="43">                                                X4 <span class="op">~</span><span class="st"> </span>treatment <span class="op">+</span><span class="st"> </span>covar,</a>
+<a class="sourceLine" id="cb1-44" data-line-number="44">                                                X5 <span class="op">~</span><span class="st"> </span>treatment <span class="op">+</span><span class="st"> </span>covar),</a>
+<a class="sourceLine" id="cb1-45" data-line-number="45">                              <span class="dt">data =</span> <span class="kw">data.frame</span>(treatment, outcomes, covar),</a>
+<a class="sourceLine" id="cb1-46" data-line-number="46">                              <span class="dt">coef_list =</span> <span class="kw">rep</span>(<span class="st">"treatment"</span>, k),</a>
+<a class="sourceLine" id="cb1-47" data-line-number="47">                              <span class="dt">nboots =</span> <span class="dv">200</span>,</a>
+<a class="sourceLine" id="cb1-48" data-line-number="48">                              <span class="dt">parallel =</span> <span class="ot">FALSE</span>, <span class="dt">pb =</span> <span class="ot">FALSE</span>,</a>
+<a class="sourceLine" id="cb1-49" data-line-number="49">                              <span class="dt">boot_type =</span> <span class="st">"pairs"</span>)<span class="op">$</span>bs_pvalues_adjusted</a>
+<a class="sourceLine" id="cb1-50" data-line-number="50"></a>
+<a class="sourceLine" id="cb1-51" data-line-number="51">  <span class="kw">data.frame</span>(<span class="dt">nominal =</span> <span class="kw">any</span>(nom_pvalues <span class="op">&lt;=</span><span class="st"> </span><span class="fl">.05</span>),</a>
+<a class="sourceLine" id="cb1-52" data-line-number="52">    <span class="dt">holm =</span> <span class="kw">any</span>(<span class="kw">p.adjust</span>(nom_pvalues, <span class="dt">method =</span> <span class="st">"holm"</span>) <span class="op">&lt;=</span><span class="st"> </span><span class="fl">.05</span>),</a>
+<a class="sourceLine" id="cb1-53" data-line-number="53">    <span class="dt">boot =</span> <span class="kw">any</span>(boot_pvals <span class="op">&lt;=</span><span class="st"> </span><span class="fl">.05</span>))</a>
+<a class="sourceLine" id="cb1-54" data-line-number="54">}</a>
+<a class="sourceLine" id="cb1-55" data-line-number="55"></a>
+<a class="sourceLine" id="cb1-56" data-line-number="56">out &lt;-<span class="st"> </span><span class="kw">foreach</span>(<span class="dt">i=</span><span class="dv">1</span><span class="op">:</span>nsims, <span class="dt">.packages =</span> <span class="kw">c</span>(<span class="st">"multitestr"</span>, <span class="st">"lmtest"</span>, <span class="st">"sandwich"</span>)) <span class="op">%dopar%</span></a>
+<a class="sourceLine" id="cb1-57" data-line-number="57"><span class="st">  </span><span class="kw">sim_function</span>()</a>
+<a class="sourceLine" id="cb1-58" data-line-number="58"></a>
+<a class="sourceLine" id="cb1-59" data-line-number="59"><span class="kw">apply</span>(dplyr<span class="op">::</span><span class="kw"><a href="http://dplyr.tidyverse.org/reference/bind.html">bind_rows</a></span>(out), <span class="dt">MAR =</span> <span class="dv">2</span>, mean)</a>
+<a class="sourceLine" id="cb1-60" data-line-number="60"><span class="co">#&gt; nominal    holm    boot </span></a>
+<a class="sourceLine" id="cb1-61" data-line-number="61"><span class="co">#&gt;   0.120   0.026   0.046</span></a></code></pre></div>
 <p>We compare the FWER across three types of <em>p</em>-values: unadjusted (<code>nominal</code>) <em>p</em>-values, <em>p</em>-values adjusted using the Holm (1979) method (<code>holm</code>), and <em>p</em>-values adjusted using the Westfall and Young (1993) resampling-based (bootstrapped) step down procedure presented above (<code>boot</code>). The FWER using nominal <em>p</em>-values exceeds 0.05. Both the Holm and the bootstrapped step-down methods produce Type I errors in 0.05 or less of all samples (i.e. they successfully control the FWER at <span class="math inline">\(\alpha = 0.05\)</span>), but the Holm method is more conservative and hence less powerful.</p>
 </div>
-<div id="application" class="section level2">
+<div id="caseyetal" class="section level2">
 <h2 class="hasAnchor">
-<a href="#application" class="anchor"></a>Application</h2>
+<a href="#caseyetal" class="anchor"></a>Application</h2>
 <div id="multiple-outcomes" class="section level3">
 <h3 class="hasAnchor">
 <a href="#multiple-outcomes" class="anchor"></a>Multiple Outcomes</h3>
@@ -282,6 +293,68 @@ H = \bigcap_{i \in M_0} H_i, \quad M_0 = M.
 <!-- |Hypothesis 12 |t        |                 0.347|               0.931| -->
 </div>
 </div>
+<div id="comparison-to-stata-package-wyoung" class="section level2">
+<h2 class="hasAnchor">
+<a href="#comparison-to-stata-package-wyoung" class="anchor"></a>Comparison to Stata package <code>wyoung</code>
+</h2>
+<p>Jones et al (2018) have developed a Stata implementation of the Westfall and Young bootstrap method called <a href="https://ideas.repec.org/c/boc/bocode/s458440.html"><code>wyoung</code></a>. In their <a href="https://www.nber.org/workplacewellness/s/wyoung.pdf">documentation</a>, Jones et al report simulations on the performance the method under a variety of scenarios. We replicate two of their simulations and show that results our results are close (within simulation error) to what they report.</p>
+<p>In columns 1 and 3 of Table 1 in their <a href="https://www.nber.org/workplacewellness/s/wyoung.pdf">documentation</a>, Jones et al (2018) report results from a simulation with two different data generating processes: one with normal errors and one with correlated errors. The basic setup is as follows: let <span class="math inline">\(\mu\)</span> be a 10 dimensional vector of zeros <span class="math inline">\((0,0,\ldots,0)'\)</span>, <span class="math inline">\(I\)</span> is a 10 x 10 identity matrix, and <span class="math inline">\(\Sigma\)</span> is a 10 x 10 covariance matrix where all the off diagonal entries are equal to 0.9.</p>
+<p>The data generating process for the two simulations are:</p>
+<ol style="list-style-type: decimal">
+<li>Normal i.i.d. errors (10 outcomes) and null hypothesis is true</li>
+</ol>
+<ul>
+<li><span class="math inline">\(\epsilon \sim N(\mu, I)\)</span></li>
+<li><span class="math inline">\(Y = \epsilon\)</span></li>
+<li><span class="math inline">\(X \sim N(0,1)\)</span></li>
+</ul>
+<ol start="2" style="list-style-type: decimal">
+<li>Correlated Outcomes (10 outcomes) and null hypothesis is false</li>
+</ol>
+<ul>
+<li><span class="math inline">\(X \sim N(\mu,I)\)</span></li>
+<li><span class="math inline">\(\epsilon \sim N(\mu, \Sigma)\)</span></li>
+<li>
+<span class="math inline">\(Y = 0.2X + \epsilon\)</span>s</li>
+</ul>
+<p>As in Jones et al (2018), we draw 2000 samples and in each of the simulations, we esitmate 10 regressions: <span class="math inline">\(Y_i = \alpha + \beta_i X_i + \epsilon_i, i=1\ldots 10\)</span>. To compare multiple testing methods, we compute the empirical FWER for each type of data generating process and ajustment method.</p>
+<table class="table" style="border-collapse: collapse; margin-bottom: 2em; margin-top: 2em; width: 50%; margin-left: 0%; margin-right: auto; ">
+<caption style="caption-side: top; text-align: left;">Simulation Results Comparing multitestr and wyoung</caption>
+<col>
+<col>
+<col>
+<col>
+<tr>
+<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0.4pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">Simulation</td>
+<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">Adjustment Method</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">Simulation FWER</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0.4pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">Jones et al Simulation FWER</td>
+</tr>
+<tr>
+<td rowspan="2" style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">Normal Errors, Null Hypo. True</td>
+<td style="vertical-align: top; text-align: left; white-space: nowrap; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">Unadjusted</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.39  </td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.398</td>
+</tr>
+<tr>
+<td style="vertical-align: top; text-align: left; white-space: nowrap; padding: 4pt 4pt 4pt 4pt;">Westfall-Young</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; padding: 4pt 4pt 4pt 4pt;">0.0545</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt;">0.041</td>
+</tr>
+<tr>
+<td rowspan="2" style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">Correlated Errors, Null Hypo. False</td>
+<td style="vertical-align: top; text-align: left; white-space: nowrap; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">Unadjusted</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.685 </td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.685</td>
+</tr>
+<tr>
+<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">Westfall-Young</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">0.49  </td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">0.513</td>
+</tr>
+</table>
+<p>The results reported in the above Table shows that the <code>multitestr</code> implemention produces results close to the results reported in Jones et al.</p>
+</div>
 <div id="references" class="section level2">
 <h2 class="hasAnchor">
 <a href="#references" class="anchor"></a>References</h2>
@@ -289,6 +362,7 @@ H = \bigcap_{i \in M_0} H_i, \quad M_0 = M.
 <p>Cameron, Colin, Johah Gelbach, and Douglas Miller. 2008. “Bootstrap-based Improvements For Inference With Clustered Errors”. <em>The Review of Economics and Statistics.</em> 900(3):414-427.</p>
 <p>Casey, Katherine, Rachel Glennerster, and Edward Miguel. 2012. “Reshaping Institutions: Evidence on Aid Impacts Using a Preanalysis Plan”. <em>Quarterly Journal of Economics.</em> 127(4):1755-1812.</p>
 <p>Holm, S. 1979. “A simple sequentially rejective multiple test procedure”. <em>Scandinavian Journal of Statistics.</em> 6(2):65–70.</p>
+<p>Jones, D., D. Molitor, and J. Reif. 2018. “What Do Workplace Wellness Programs Do? Evidence from the Illinois Workplace Wellness Study.” <em>National Bureau of Economic Research Working Paper No. 24229</em>.</p>
 <p>Westfall, Peter H., and S. Stanley Young. 1993. <em>Resampling-Based Multiple Testing: Examples and Methods for P-Value Adjustment.</em> New York: John Wiley &amp; Sons.</p>
 </div>
   </div>
@@ -298,11 +372,11 @@ H = \bigcap_{i \in M_0} H_i, \quad M_0 = M.
       <h2 class="hasAnchor">
 <a href="#tocnav" class="anchor"></a>Contents</h2>
       <ul class="nav nav-pills nav-stacked">
-<li><a href="#controlling-the-familywise-error-rate">Controlling the familywise error rate</a></li>
-      <li><a href="#resampling-based-step-down-procedure">Resampling-based step down procedure</a></li>
-      <li><a href="#resampling-methods">Resampling Methods</a></li>
-      <li><a href="#simulation">Simulation</a></li>
-      <li><a href="#application">Application</a></li>
+<li><a href="#fwer">Controlling the familywise error rate</a></li>
+      <li><a href="#stepdown">Resampling-based step down procedure</a></li>
+      <li><a href="#sim">Simulation</a></li>
+      <li><a href="#caseyetal">Application</a></li>
+      <li><a href="#comparison-to-stata-package-wyoung">Comparison to Stata package <code>wyoung</code></a></li>
       <li><a href="#references">References</a></li>
       </ul>
 </div>
